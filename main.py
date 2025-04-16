@@ -13,7 +13,7 @@ async def main(url):
 
     # HTMLパース処理
     parser = HTMLParser(scraper.get_content())
-    entry_content = parser.extract_entry_content()
+    entry_content = parser.extract_conversation_structure()
 
     # コンテンツが抽出できたら保存
     if entry_content:
