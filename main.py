@@ -2,7 +2,7 @@ import sys
 import asyncio
 from scraper import WebScraper
 from parser import HTMLParser
-from utils import save_to_file
+from utils import save_to_file, generate_filename_from_url
 
 async def main(url):
     translate_url = f"https://translate.google.com/translate?sl=auto&tl=ja&hl=ja&u={url}"
@@ -17,8 +17,9 @@ async def main(url):
 
     # コンテンツが抽出できたら保存
     if entry_content:
-        save_to_file(entry_content)
-        print(f"Content from {url} has been saved to output/output.txt")
+        filename = generate_filename_from_url(url)
+        save_to_file(entry_content, filename)
+        print(f"Content from {url} has been saved to {filename}")
     else:
         print(f"Could not find content with class 'entry-content' on {url}.")
 
