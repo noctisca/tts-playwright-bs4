@@ -1,4 +1,5 @@
 from bs4 import BeautifulSoup
+import urllib.parse
 
 class HTMLParser:
     def __init__(self, html_content):
@@ -32,13 +33,23 @@ class HTMLParser:
 
                 speaker_elem = elem.find('span', class_='ts-name')
                 text_elem = elem.find('span', class_='ts-text')
+                timestamp_elem = elem.find('span', class_='ts-timestamp')
 
                 speaker = speaker_elem.get_text(strip=True) if speaker_elem else ""
                 text = text_elem.get_text(strip=True) if text_elem else ""
 
+                timestamp = ""
+                if timestamp_elem:
+                    link = timestamp_elem.find('a', href=True)
+                    if link and 'href' in link.attrs:
+                        decoded_url = urllib.parse.unquote(link['href'])
+                        if 't=' in decoded_url:
+                            timestamp = decoded_url.split('t=')[-1].split('&')[0]
+
                 segment = {
                     "speaker": speaker,
-                    "text": text
+                    "text": text,
+                    "timestamp": timestamp
                 }
                 current_chapter["segments"].append(segment)
 
