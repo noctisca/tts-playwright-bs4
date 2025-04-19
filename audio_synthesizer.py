@@ -4,6 +4,8 @@ import requests
 from pydub import AudioSegment
 import re
 
+VOICEVOX_BASE_URL = "http://127.0.0.1:50021"
+
 class AudioSynthesizer:
     def __init__(self, base_filename):
         self.base_filename = base_filename
@@ -26,14 +28,14 @@ class AudioSynthesizer:
                     speaker = prev_speaker
                 speaker_id = '9' if speaker == 'レックス・フリードマン' else '13'
                 wav_output_path = f"{chapter_dir}/{self.base_filename}_{chapter_no}_{idx}.wav"
-                query_url = f"http://127.0.0.1:50021/audio_query?speaker={speaker_id}"
+                query_url = f"{VOICEVOX_BASE_URL}/audio_query?speaker={speaker_id}"
                 query_response = requests.post(query_url, params={"text": text})
                 if query_response.status_code == 200:
                     query_data = query_response.json()
                 else:
                     print(f"Failed to generate audio query for text: {text}")
                     continue
-                synthesis_url = f"http://127.0.0.1:50021/synthesis?speaker={speaker_id}"
+                synthesis_url = f"{VOICEVOX_BASE_URL}/synthesis?speaker={speaker_id}"
                 synthesis_response = requests.post(synthesis_url, headers={"Content-Type": "application/json"}, json=query_data)
                 if synthesis_response.status_code == 200:
                     with open(wav_output_path, 'wb') as wav_file:
