@@ -32,9 +32,6 @@ async def main(url):
     else:
         print(f"既存のJSONファイルが見つかりました: {json_file_path}")
 
-    process_audio(json_file_path, filename)
-
-def process_audio(json_file_path, filename):
     synthesizer = AudioSynthesizer(filename)
     synthesizer.synthesize_from_json(json_file_path)
 
