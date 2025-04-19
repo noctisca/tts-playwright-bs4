@@ -24,7 +24,7 @@ class AudioSynthesizer:
                 if speaker == "":
                     speaker = prev_speaker
                 speaker_id = '9' if speaker == 'レックス・フリードマン' else '13'
-                wav_output_path = f"{chapter_dir}/segment-{idx}.wav"
+                wav_output_path = f"{chapter_dir}/{self.base_filename}_{chapter_no}_{idx}.wav"
                 query_url = f"http://127.0.0.1:50021/audio_query?speaker={speaker_id}"
                 query_response = requests.post(query_url, params={"text": text})
                 if query_response.status_code == 200:
