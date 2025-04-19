@@ -46,7 +46,8 @@ class AudioSynthesizer:
     def concatenate_chapter_audio(self, chapter, chapter_dir):
         wav_files = [
             os.path.join(chapter_dir, file)
-            for file in sorted(os.listdir(chapter_dir)) if file.endswith('.wav')
+            for file in sorted(os.listdir(chapter_dir))
+            if file.startswith(f"{self.base_filename}_{chapter['no']}_") and file.endswith('.wav')
         ]
         combined_audio = AudioSegment.empty()
         for wav_file in wav_files:
