@@ -30,6 +30,12 @@ class AudioSynthesizer:
                 speaker_id = '9' if speaker == 'レックス・フリードマン' else '13'
                 wav_output_path = f"{chapter_dir}/{self.base_filename}_{chapter_no}_{idx}.wav"
 
+                # ファイルが既に存在する場合はスキップ
+                if os.path.exists(wav_output_path):
+                    print(f"Skipping existing file: {wav_output_path}")
+                    prev_speaker = speaker
+                    continue
+
                 # 長いテキストの場合は待機時間を入れる
                 if len(text) >= 562:
                     print(f"****** Long text detected ({len(text)} chars). Waiting 1 second... ******")
