@@ -8,7 +8,7 @@ def save_to_file(content, filename="output/noname.json"):
     with open(filename, 'w', encoding='utf-8') as f:
         json.dump(content, f, ensure_ascii=False, indent=2)
 
-def generate_filename_from_url(url):
+def extract_episode_name_from_url(url):
     parsed_url = urlparse(url)
     path_parts = parsed_url.path.strip('/').split('-')
 

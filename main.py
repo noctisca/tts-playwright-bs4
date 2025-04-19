@@ -3,11 +3,11 @@ import asyncio
 import os
 from scraper import WebScraper
 from parser import HTMLParser
-from utils import save_to_file, generate_filename_from_url
+from utils import save_to_file, extract_episode_name_from_url
 from audio_synthesizer import AudioSynthesizer
 
 async def main(url):
-    episode_name = generate_filename_from_url(url)
+    episode_name = extract_episode_name_from_url(url)
     json_file_path = f"output/{episode_name}.json"  # JSONファイルのパスを生成
 
     # JSONファイルがなければスクレイピング→保存
