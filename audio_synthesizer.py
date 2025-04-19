@@ -2,6 +2,7 @@ import os
 import json
 import requests
 from pydub import AudioSegment
+import re
 
 class AudioSynthesizer:
     def __init__(self, base_filename):
@@ -44,9 +45,12 @@ class AudioSynthesizer:
             self.concatenate_chapter_audio(chapter, chapter_dir)
 
     def concatenate_chapter_audio(self, chapter, chapter_dir):
+        def extract_idx(filename):
+            match = re.search(rf"{self.base_filename}_{chapter['no']}_(\d+)\.wav$", filename)
+            return int(match.group(1)) if match else -1
         wav_files = [
             os.path.join(chapter_dir, file)
-            for file in sorted(os.listdir(chapter_dir))
+            for file in sorted(os.listdir(chapter_dir), key=extract_idx)
             if file.startswith(f"{self.base_filename}_{chapter['no']}_") and file.endswith('.wav')
         ]
         combined_audio = AudioSegment.empty()
