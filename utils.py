@@ -7,15 +7,15 @@ def save_to_file(content, filename="output/noname.json"):
     with open(filename, 'w', encoding='utf-8') as f:
         f.write(str(content))
 
-def generate_filename_from_url(url, output_dir="output"):
+def generate_filename_from_url(url):
     parsed_url = urlparse(url)
     path_parts = parsed_url.path.strip('/').split('-')
 
     if path_parts[-1] == "transcript":
         # Remove the "-transcript" part if it exists
-        filename_prefix = '-'.join(path_parts[:-1])
+        filename = '-'.join(path_parts[:-1])
     else:
         # Use the full path as the filename if "-transcript" is not present
-        filename_prefix = '-'.join(path_parts) if path_parts else "noname"
+        filename = '-'.join(path_parts) if path_parts else "noname"
 
-    return f"{output_dir}/{filename_prefix}.json"
+    return filename  # 拡張子はここで付けない
