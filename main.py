@@ -38,6 +38,7 @@ def synthesize_audio_from_json(json_file, base_filename):
     with open(json_file, 'r', encoding='utf-8') as f:
         data = json.load(f)
 
+    prev_speaker = 'レックス・フリードマン'  # デフォルト
     for chapter in data:
         chapter_no = chapter['no']
         segments = chapter['segments']
@@ -51,6 +52,8 @@ def synthesize_audio_from_json(json_file, base_filename):
             text = segment['text']
 
             # Determine speaker ID
+            if speaker == "":
+                speaker = prev_speaker
             speaker_id = '9' if speaker == 'レックス・フリードマン' else '13'
 
             # Generate filenames
@@ -76,6 +79,8 @@ def synthesize_audio_from_json(json_file, base_filename):
                 print(f"Generated audio: {wav_output_path}")
             else:
                 print(f"Failed to synthesize audio for text: {text}")
+
+            prev_speaker = speaker
 
 def concatenate_chapter_audio(json_file, base_filename):
     with open(json_file, 'r', encoding='utf-8') as f:
