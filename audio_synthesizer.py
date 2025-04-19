@@ -42,14 +42,21 @@ class AudioSynthesizer:
                     time.sleep(1)
 
                 query_url = f"{VOICEVOX_BASE_URL}/audio_query?speaker={speaker_id}"
-                query_response = requests.post(query_url, params={"text": text})
+                query_response = requests.post(
+                    query_url,
+                    params={"text": text}
+                )
                 if query_response.status_code == 200:
                     query_data = query_response.json()
                 else:
                     print(f"Failed to generate audio query for text: {text}")
                     continue
                 synthesis_url = f"{VOICEVOX_BASE_URL}/synthesis?speaker={speaker_id}"
-                synthesis_response = requests.post(synthesis_url, headers={"Content-Type": "application/json"}, json=query_data)
+                synthesis_response = requests.post(
+                    synthesis_url,
+                    headers={"Content-Type": "application/json"},
+                    json=query_data
+                )
                 if synthesis_response.status_code == 200:
                     with open(wav_output_path, 'wb') as wav_file:
                         wav_file.write(synthesis_response.content)
