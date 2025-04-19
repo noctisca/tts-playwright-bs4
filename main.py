@@ -38,7 +38,6 @@ async def main(url):
 
 def process_audio(json_file_path, filename):
     synthesize_audio_from_json(json_file_path, filename)
-    concatenate_chapter_audio(json_file_path, filename)
 
 def synthesize_audio_from_json(json_file, base_filename):
     with open(json_file, 'r', encoding='utf-8') as f:
@@ -88,33 +87,19 @@ def synthesize_audio_from_json(json_file, base_filename):
 
             prev_speaker = speaker
 
-def concatenate_chapter_audio(json_file, base_filename):
-    with open(json_file, 'r', encoding='utf-8') as f:
-        data = json.load(f)
-
-    for chapter in data:
-        chapter_no = chapter['no']
-        chapter_title = chapter['title']
-
-        # Path to the chapter directory
-        chapter_dir = f"voicebox/{base_filename}/chapter-{chapter_no}"
-
-        # Collect all WAV file paths in the chapter directory
+        # チャプターごとに音声結合
         wav_files = [
             os.path.join(chapter_dir, file)
             for file in sorted(os.listdir(chapter_dir)) if file.endswith('.wav')
         ]
-
-        # Combine WAV files
         combined_audio = AudioSegment.empty()
         for wav_file in wav_files:
             combined_audio += AudioSegment.from_wav(wav_file)
 
-        # Save the combined audio
         output_dir = f"lex-fridman-podcast/{base_filename}"
         os.makedirs(output_dir, exist_ok=True)
+        chapter_title = chapter['title']
         output_path = f"{output_dir}/{base_filename}-chapter-{chapter_no}-{chapter_title}.wav"
-
         combined_audio.export(output_path, format="wav")
         print(f"Saved combined audio for chapter {chapter_no}: {output_path}")
 
