@@ -3,6 +3,7 @@ import json
 import requests
 from pydub import AudioSegment
 import re
+import time
 
 VOICEVOX_BASE_URL = "http://127.0.0.1:50021"
 
@@ -28,6 +29,12 @@ class AudioSynthesizer:
                     speaker = prev_speaker
                 speaker_id = '9' if speaker == 'レックス・フリードマン' else '13'
                 wav_output_path = f"{chapter_dir}/{self.base_filename}_{chapter_no}_{idx}.wav"
+
+                # 長いテキストの場合は待機時間を入れる
+                if len(text) >= 562:
+                    print(f"****** Long text detected ({len(text)} chars). Waiting 1 second... ******")
+                    time.sleep(1)
+
                 query_url = f"{VOICEVOX_BASE_URL}/audio_query?speaker={speaker_id}"
                 query_response = requests.post(query_url, params={"text": text})
                 if query_response.status_code == 200:
