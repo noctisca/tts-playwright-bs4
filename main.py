@@ -1,12 +1,10 @@
 import sys
 import asyncio
-import json
 import os
-import requests
-from pydub import AudioSegment
 from scraper import WebScraper
 from parser import HTMLParser
 from utils import save_to_file, generate_filename_from_url
+from audio_synthesizer import AudioSynthesizer
 
 async def main(url):
     filename = generate_filename_from_url(url)
@@ -37,71 +35,8 @@ async def main(url):
     process_audio(json_file_path, filename)
 
 def process_audio(json_file_path, filename):
-    synthesize_audio_from_json(json_file_path, filename)
-
-def synthesize_audio_from_json(json_file, base_filename):
-    with open(json_file, 'r', encoding='utf-8') as f:
-        data = json.load(f)
-
-    prev_speaker = 'レックス・フリードマン'  # デフォルト
-    for chapter in data:
-        chapter_no = chapter['no']
-        segments = chapter['segments']
-
-        # Create a directory for the chapter
-        chapter_dir = f"voicebox/{base_filename}/chapter-{chapter_no}"
-        os.makedirs(chapter_dir, exist_ok=True)
-
-        for idx, segment in enumerate(segments):
-            speaker = segment['speaker']
-            text = segment['text']
-
-            # Determine speaker ID
-            if speaker == "":
-                speaker = prev_speaker
-            speaker_id = '9' if speaker == 'レックス・フリードマン' else '13'
-
-            # Generate filenames
-            wav_output_path = f"{chapter_dir}/segment-{idx}.wav"
-
-            # Step 1: Generate audio query JSON
-            query_url = f"http://127.0.0.1:50021/audio_query?speaker={speaker_id}"
-            query_response = requests.post(query_url, params={"text": text})
-
-            if query_response.status_code == 200:
-                query_data = query_response.json()
-            else:
-                print(f"Failed to generate audio query for text: {text}")
-                continue
-
-            # Step 2: Synthesize audio from JSON
-            synthesis_url = f"http://127.0.0.1:50021/synthesis?speaker={speaker_id}"
-            synthesis_response = requests.post(synthesis_url, headers={"Content-Type": "application/json"}, json=query_data)
-
-            if synthesis_response.status_code == 200:
-                with open(wav_output_path, 'wb') as wav_file:
-                    wav_file.write(synthesis_response.content)
-                print(f"Generated audio: {wav_output_path}")
-            else:
-                print(f"Failed to synthesize audio for text: {text}")
-
-            prev_speaker = speaker
-
-        # チャプターごとに音声結合
-        wav_files = [
-            os.path.join(chapter_dir, file)
-            for file in sorted(os.listdir(chapter_dir)) if file.endswith('.wav')
-        ]
-        combined_audio = AudioSegment.empty()
-        for wav_file in wav_files:
-            combined_audio += AudioSegment.from_wav(wav_file)
-
-        output_dir = f"lex-fridman-podcast/{base_filename}"
-        os.makedirs(output_dir, exist_ok=True)
-        chapter_title = chapter['title']
-        output_path = f"{output_dir}/{base_filename}-chapter-{chapter_no}-{chapter_title}.wav"
-        combined_audio.export(output_path, format="wav")
-        print(f"Saved combined audio for chapter {chapter_no}: {output_path}")
+    synthesizer = AudioSynthesizer(filename)
+    synthesizer.synthesize_from_json(json_file_path)
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
