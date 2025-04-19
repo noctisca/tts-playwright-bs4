@@ -7,8 +7,8 @@ from utils import save_to_file, generate_filename_from_url
 from audio_synthesizer import AudioSynthesizer
 
 async def main(url):
-    filename = generate_filename_from_url(url)
-    json_file_path = f"output/{filename}.json"  # JSONファイルのパスを生成
+    episode_name = generate_filename_from_url(url)
+    json_file_path = f"output/{episode_name}.json"  # JSONファイルのパスを生成
 
     # JSONファイルがなければスクレイピング→保存
     if not os.path.exists(json_file_path):
@@ -32,7 +32,7 @@ async def main(url):
     else:
         print(f"既存のJSONファイルが見つかりました: {json_file_path}")
 
-    synthesizer = AudioSynthesizer(filename)
+    synthesizer = AudioSynthesizer(episode_name)
     synthesizer.synthesize_from_json(json_file_path)
 
 if __name__ == '__main__':

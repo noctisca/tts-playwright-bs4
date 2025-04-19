@@ -8,8 +8,8 @@ import time
 VOICEVOX_BASE_URL = "http://127.0.0.1:50021"
 
 class AudioSynthesizer:
-    def __init__(self, base_filename):
-        self.base_filename = base_filename
+    def __init__(self, episode_name):
+        self.episode_name = episode_name
 
     def synthesize_from_json(self, json_file):
         with open(json_file, 'r', encoding='utf-8') as f:
@@ -19,7 +19,7 @@ class AudioSynthesizer:
         for chapter in data:
             chapter_no = chapter['no']
             segments = chapter['segments']
-            chapter_dir = f"voicevox/{self.base_filename}/chapter-{chapter_no}"
+            chapter_dir = f"voicevox/{self.episode_name}/chapter-{chapter_no}"
             os.makedirs(chapter_dir, exist_ok=True)
 
             for idx, segment in enumerate(segments):
@@ -28,7 +28,7 @@ class AudioSynthesizer:
                 if speaker == "":
                     speaker = prev_speaker
                 speaker_id = '9' if speaker == 'レックス・フリードマン' else '13'
-                wav_output_path = f"{chapter_dir}/{self.base_filename}_{chapter_no}_{idx}.wav"
+                wav_output_path = f"{chapter_dir}/{self.episode_name}_{chapter_no}_{idx}.wav"
 
                 # ファイルが既に存在する場合はスキップ
                 if os.path.exists(wav_output_path):
@@ -61,20 +61,20 @@ class AudioSynthesizer:
 
     def concatenate_chapter_audio(self, chapter, chapter_dir):
         def extract_idx(filename):
-            match = re.search(rf"{self.base_filename}_{chapter['no']}_(\d+)\.wav$", filename)
+            match = re.search(rf"{self.episode_name}_{chapter['no']}_(\d+)\.wav$", filename)
             return int(match.group(1)) if match else -1
         wav_files = [
             os.path.join(chapter_dir, file)
             for file in sorted(os.listdir(chapter_dir), key=extract_idx)
-            if file.startswith(f"{self.base_filename}_{chapter['no']}_") and file.endswith('.wav')
+            if file.startswith(f"{self.episode_name}_{chapter['no']}_") and file.endswith('.wav')
         ]
         combined_audio = AudioSegment.empty()
         for wav_file in wav_files:
             combined_audio += AudioSegment.from_wav(wav_file)
-        output_dir = f"voicevox/lex-fridman-podcast/{self.base_filename}"
+        output_dir = f"voicevox/lex-fridman-podcast/{self.episode_name}"
         os.makedirs(output_dir, exist_ok=True)
         chapter_title = chapter['title']
         chapter_no = chapter['no']
-        output_path = f"{output_dir}/{self.base_filename}-chapter-{chapter_no}-{chapter_title}.wav"
+        output_path = f"{output_dir}/{self.episode_name}-chapter-{chapter_no}-{chapter_title}.wav"
         combined_audio.export(output_path, format="wav")
         print(f"Saved combined audio for chapter {chapter_no}: {output_path}")
