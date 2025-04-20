@@ -6,6 +6,10 @@ from voicevox_client import VoicevoxClient
 
 
 class AudioSynthesizer:
+    # 出力ディレクトリの設定
+    BASE_DIR = "voicevox"
+    PODCAST_DIR = f"{BASE_DIR}/lex-fridman-podcast"
+
     def __init__(self, episode_name):
         self.episode_name = episode_name
         self.voicevox = VoicevoxClient()
@@ -14,11 +18,11 @@ class AudioSynthesizer:
         with open(json_file, "r", encoding="utf-8") as f:
             data = json.load(f)
 
-        prev_speaker = "レックス・フリードマン"  # デフォルト
+        prev_speaker = VoicevoxClient.HOST_NAME
         for chapter in data:
             chapter_no = chapter["no"]
             segments = chapter["segments"]
-            chapter_dir = f"voicevox/{self.episode_name}/chapter-{chapter_no}"
+            chapter_dir = f"{self.BASE_DIR}/{self.episode_name}/chapter-{chapter_no}"
             os.makedirs(chapter_dir, exist_ok=True)
 
             for idx, segment in enumerate(segments):
@@ -74,7 +78,7 @@ class AudioSynthesizer:
         combined_audio = AudioSegment.empty()
         for wav_file in wav_files:
             combined_audio += AudioSegment.from_wav(wav_file)
-        output_dir = f"voicevox/lex-fridman-podcast/{self.episode_name}"
+        output_dir = f"{self.PODCAST_DIR}/{self.episode_name}"
         os.makedirs(output_dir, exist_ok=True)
         chapter_title = chapter["title"]
         chapter_no = chapter["no"]
