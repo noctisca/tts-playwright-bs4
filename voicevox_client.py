@@ -1,17 +1,25 @@
 import requests
 import time
 
-
 class VoicevoxClient:
-    def __init__(self, base_url="http://127.0.0.1:50021"):
-        self.base_url = base_url
+    # VOICEVOXの設定
+    BASE_URL = "http://127.0.0.1:50021"
+    LONG_TEXT_THRESHOLD = 562  # 長いテキストと判断する文字数の閾値
+
+    # 話者の設定
+    HOST_SPEAKER_ID = "9"  # ホスト（レックス）の声色用のVOICEVOX話者ID
+    GUEST_SPEAKER_ID = "13"  # ゲストの声色用のVOICEVOX話者ID
+    HOST_NAME = "レックス・フリードマン"
+
+    def __init__(self, base_url=None):
+        self.base_url = base_url or self.BASE_URL
 
     def create_audio_query(self, text: str, speaker_id: str):
         """VOICEVOXのaudio_query APIを呼び出してクエリデータを取得します"""
         query_url = f"{self.base_url}/audio_query?speaker={speaker_id}"
 
         # 長いテキストの場合は待機時間を入れる
-        if len(text) >= 562:
+        if len(text) >= self.LONG_TEXT_THRESHOLD:
             print(
                 f"****** Long text detected ({len(text)} chars). Waiting 1 second... ******"
             )
@@ -42,4 +50,8 @@ class VoicevoxClient:
     @staticmethod
     def get_speaker_id(speaker_name: str) -> str:
         """話者名からVOICEVOXのspeaker_idを取得します"""
-        return "9" if speaker_name == "レックス・フリードマン" else "13"
+        return (
+            VoicevoxClient.HOST_SPEAKER_ID
+            if speaker_name == VoicevoxClient.HOST_NAME
+            else VoicevoxClient.GUEST_SPEAKER_ID
+        )
