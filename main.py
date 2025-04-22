@@ -10,7 +10,7 @@ from src.data_models.transcript_models import Transcript
 
 async def main(url: str) -> None:
     episode_name = extract_episode_name_from_url(url)
-    json_file_path = f"output/{episode_name}.json"
+    json_file_path = os.path.join("output", f"{episode_name}.json")
 
     if os.path.exists(json_file_path):
         print(f"既存のJSONファイルが見つかりました: {json_file_path}")
