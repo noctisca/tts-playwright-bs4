@@ -12,8 +12,6 @@ class AudioSynthesizer:
         self.episode_name = episode_name
         self.voicevox = VoicevoxClient()
 
-    # _get_segment_path is removed as it's moved to Chapter class
-
     def _synthesize_segment(self, segment: Segment, wav_output_path: str) -> None:
         """1つのセグメントの音声を合成してファイルに保存します"""
         speaker_id = self.voicevox.get_speaker_id(segment.speaker)
@@ -44,7 +42,6 @@ class AudioSynthesizer:
         for idx, segment in enumerate(chapter.segments):
             speaker = self._get_speaker_for_segment(segment, prev_speaker)
             segment.speaker = speaker  # 話者情報を更新
-            # Use the new method from Chapter class
             wav_output_path = chapter.get_segment_path(self.episode_name, idx)
 
             # ファイルが既に存在する場合はスキップ
