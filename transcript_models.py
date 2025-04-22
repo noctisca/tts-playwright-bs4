@@ -34,19 +34,20 @@ class Chapter:
 
     def get_chapter_dir(self, episode_name: str) -> str:
         """チャプターの音声ファイルを格納するディレクトリのパスを返します"""
-        # Note: Using f-string for now as requested, will change to os.path.join later if desired.
-        return f"{self.BASE_DIR}/{episode_name}/chapter-{self.no}"
+        # Use os.path.join for OS compatibility
+        return os.path.join(self.BASE_DIR, episode_name, f"chapter-{self.no}")
 
     def get_segment_path(self, episode_name: str, segment_idx: int) -> str:
         """個別の音声セグメントファイルのパスを返します"""
         chapter_dir = self.get_chapter_dir(episode_name)
-        # Using f-string for consistency within this file for now
-        return f"{chapter_dir}/{episode_name}_{self.no}_{segment_idx}.wav"
+        # Use os.path.join for OS compatibility
+        return os.path.join(chapter_dir, f"{episode_name}_{self.no}_{segment_idx}.wav")
 
     def get_combined_output_path(self, episode_name: str) -> str:
         """結合後の音声ファイルの出力パスを返します"""
-        output_dir = f"{self.BASE_DIR}/lex-fridman-podcast/{episode_name}"
-        return f"{output_dir}/{episode_name}-chapter-{self.no}-{self.title}.wav"
+        # Use os.path.join for OS compatibility
+        output_dir = os.path.join(self.BASE_DIR, "lex-fridman-podcast", episode_name)
+        return os.path.join(output_dir, f"{episode_name}-chapter-{self.no}-{self.title}.wav")
 
 
 @dataclass
