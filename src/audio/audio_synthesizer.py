@@ -1,9 +1,9 @@
 import os
 from pydub import AudioSegment
 import re
-from voicevox_client import VoicevoxClient
+from .voicevox_client import VoicevoxClient
 from typing import List
-from transcript_models import Transcript, Chapter, Segment
+from src.data_models.transcript_models import Transcript, Chapter, Segment
 
 
 class AudioSynthesizer:

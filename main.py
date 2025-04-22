@@ -1,11 +1,11 @@
 import sys
 import asyncio
 import os
-from scraper import WebScraper
-from parser import HTMLParser
-from utils import extract_episode_name_from_url
-from audio_synthesizer import AudioSynthesizer
-from transcript_models import Transcript
+from src.parsing.scraper import WebScraper
+from src.parsing.parser import HTMLParser
+from src.utils.utils import extract_episode_name_from_url
+from src.audio.audio_synthesizer import AudioSynthesizer
+from src.data_models.transcript_models import Transcript
 
 
 async def main(url: str) -> None:
