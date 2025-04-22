@@ -33,11 +33,6 @@ class Chapter:
     segments: List[Segment]
     BASE_DIR = "voicevox"
 
-    @property
-    def segment_count(self) -> int:
-        """セグメントの数を返します"""
-        return len(self.segments)
-
     def get_chapter_dir(self, episode_name: str) -> str:
         """チャプターの音声ファイルを格納するディレクトリのパスを返します"""
         return os.path.join(self.BASE_DIR, episode_name, f"chapter-{self.no}")
