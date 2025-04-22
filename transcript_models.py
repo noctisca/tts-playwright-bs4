@@ -17,6 +17,12 @@ class Segment:
         """話者が指定されているかどうかを返します"""
         return bool(self.speaker)
 
+    def determine_speaker(self, prev_speaker: str) -> str:
+        """セグメントの話者を決定し、自身のspeaker属性を更新します。空の場合は前の話者を使用します"""
+        if not self.speaker:
+            self.speaker = prev_speaker
+        return self.speaker
+
 
 @dataclass
 class Chapter:

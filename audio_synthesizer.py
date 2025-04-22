@@ -31,15 +31,10 @@ class AudioSynthesizer:
                 f"VOICEVOXのsynthesis APIが失敗しました。テキスト: {segment.text[:100]}..."
             )
 
-    def _get_speaker_for_segment(self, segment: Segment, prev_speaker: str) -> str:
-        """セグメントの話者を決定します。空の場合は前の話者を使用します"""
-        return segment.speaker or prev_speaker
-
     def _process_segments(self, chapter: Chapter, prev_speaker: str) -> str:
         """チャプター内の各セグメントを処理し、最後のspeakerを返します"""
         for idx, segment in enumerate(chapter.segments):
-            speaker = self._get_speaker_for_segment(segment, prev_speaker)
-            segment.speaker = speaker  # 話者情報を更新
+            speaker = segment.determine_speaker(prev_speaker)
             wav_output_path = chapter.get_segment_path(self.episode_name, idx)
 
             # ファイルが既に存在する場合はスキップ
