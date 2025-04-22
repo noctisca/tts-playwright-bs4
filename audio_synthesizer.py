@@ -12,11 +12,7 @@ class AudioSynthesizer:
         self.episode_name = episode_name
         self.voicevox = VoicevoxClient()
 
-    def _get_segment_path(self, chapter: Chapter, segment_idx: int) -> str:
-        """個別の音声セグメントファイルのパスを返します"""
-        chapter_dir = chapter.get_chapter_dir(self.episode_name)
-        # Keep using f-string for now for consistency within this file
-        return f"{chapter_dir}/{self.episode_name}_{chapter.no}_{segment_idx}.wav"
+    # _get_segment_path is removed as it's moved to Chapter class
 
     def _synthesize_segment(self, segment: Segment, wav_output_path: str) -> None:
         """1つのセグメントの音声を合成してファイルに保存します"""
@@ -48,7 +44,8 @@ class AudioSynthesizer:
         for idx, segment in enumerate(chapter.segments):
             speaker = self._get_speaker_for_segment(segment, prev_speaker)
             segment.speaker = speaker  # 話者情報を更新
-            wav_output_path = self._get_segment_path(chapter, idx)
+            # Use the new method from Chapter class
+            wav_output_path = chapter.get_segment_path(self.episode_name, idx)
 
             # ファイルが既に存在する場合はスキップ
             if os.path.exists(wav_output_path):
