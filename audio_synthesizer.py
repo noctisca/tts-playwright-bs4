@@ -15,6 +15,11 @@ class AudioSynthesizer:
         self.episode_name = episode_name
         self.voicevox = VoicevoxClient()
 
+    def _load_chapters(self, json_file: str) -> List[Dict[str, Any]]:
+        """JSONファイルからチャプターデータを読み込みます"""
+        with open(json_file, "r", encoding="utf-8") as f:
+            return json.load(f)
+
     def _get_chapter_dir(self, chapter_no: str) -> str:
         """チャプターの音声ファイルを格納するディレクトリのパスを返します"""
         return f"{self.BASE_DIR}/{self.episode_name}/chapter-{chapter_no}"
@@ -32,11 +37,10 @@ class AudioSynthesizer:
         )
 
     def synthesize_from_json(self, json_file: str) -> None:
-        with open(json_file, "r", encoding="utf-8") as f:
-            data = json.load(f)
+        chapters = self._load_chapters(json_file)
 
         prev_speaker = VoicevoxClient.HOST_NAME
-        for chapter in data:
+        for chapter in chapters:
             chapter_no = chapter["no"]
             segments = chapter["segments"]
             chapter_dir = self._get_chapter_dir(chapter_no)
