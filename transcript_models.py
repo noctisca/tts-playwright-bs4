@@ -25,11 +25,17 @@ class Chapter:
     no: str
     title: str
     segments: List[Segment]
+    BASE_DIR = "voicevox"
 
     @property
     def segment_count(self) -> int:
         """セグメントの数を返します"""
         return len(self.segments)
+
+    def get_combined_output_path(self, episode_name: str) -> str:
+        """結合後の音声ファイルの出力パスを返します"""
+        output_dir = f"{self.BASE_DIR}/lex-fridman-podcast/{episode_name}"
+        return f"{output_dir}/{episode_name}-chapter-{self.no}-{self.title}.wav"
 
     
 @dataclass

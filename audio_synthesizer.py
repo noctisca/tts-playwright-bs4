@@ -24,13 +24,6 @@ class AudioSynthesizer:
         chapter_dir = self._get_chapter_dir(chapter_no)
         return f"{chapter_dir}/{self.episode_name}_{chapter_no}_{segment_idx}.wav"
 
-    def _get_combined_output_path(self, chapter: Chapter) -> str:
-        """結合後の音声ファイルの出力パスを返します"""
-        output_dir = f"{self.PODCAST_DIR}/{self.episode_name}"
-        return (
-            f"{output_dir}/{self.episode_name}-chapter-{chapter.no}-{chapter.title}.wav"
-        )
-
     def _synthesize_segment(self, segment: Segment, wav_output_path: str) -> None:
         """1つのセグメントの音声を合成してファイルに保存します"""
         speaker_id = self.voicevox.get_speaker_id(segment.speaker)
@@ -111,7 +104,7 @@ class AudioSynthesizer:
         for wav_file in wav_files:
             combined_audio += AudioSegment.from_wav(wav_file)
 
-        output_path = self._get_combined_output_path(chapter)
+        output_path = chapter.get_combined_output_path(self.episode_name)
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
         combined_audio.export(output_path, format="wav")
