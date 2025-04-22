@@ -32,15 +32,21 @@ class Chapter:
         """セグメントの数を返します"""
         return len(self.segments)
 
+    def get_chapter_dir(self, episode_name: str) -> str:
+        """チャプターの音声ファイルを格納するディレクトリのパスを返します"""
+        # Note: Using f-string for now as requested, will change to os.path.join later if desired.
+        return f"{self.BASE_DIR}/{episode_name}/chapter-{self.no}"
+
     def get_combined_output_path(self, episode_name: str) -> str:
         """結合後の音声ファイルの出力パスを返します"""
         output_dir = f"{self.BASE_DIR}/lex-fridman-podcast/{episode_name}"
         return f"{output_dir}/{episode_name}-chapter-{self.no}-{self.title}.wav"
 
-    
+
 @dataclass
 class Transcript:
     """ポッドキャストの書き起こし全体を表現するクラス"""
+
     chapters: List[Chapter]
     episode_name: str
 
@@ -50,16 +56,13 @@ class Transcript:
         chapters = []
         for chapter_data in data:
             segments = [
-                Segment(
-                    speaker=segment["speaker"],
-                    text=segment["text"]
-                )
+                Segment(speaker=segment["speaker"], text=segment["text"])
                 for segment in chapter_data["segments"]
             ]
             chapter = Chapter(
                 no=chapter_data["no"],
                 title=chapter_data.get("title", ""),  # titleが無い場合は空文字を使用
-                segments=segments
+                segments=segments,
             )
             chapters.append(chapter)
         return cls(chapters=chapters, episode_name=episode_name)

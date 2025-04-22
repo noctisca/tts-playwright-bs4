@@ -7,22 +7,16 @@ from transcript_models import Transcript, Chapter, Segment
 
 
 class AudioSynthesizer:
-    # 出力ディレクトリの設定
-    BASE_DIR = "voicevox"
-    PODCAST_DIR = f"{BASE_DIR}/lex-fridman-podcast"
 
     def __init__(self, episode_name: str):
         self.episode_name = episode_name
         self.voicevox = VoicevoxClient()
 
-    def _get_chapter_dir(self, chapter_no: str) -> str:
-        """チャプターの音声ファイルを格納するディレクトリのパスを返します"""
-        return f"{self.BASE_DIR}/{self.episode_name}/chapter-{chapter_no}"
-
-    def _get_segment_path(self, chapter_no: str, segment_idx: int) -> str:
+    def _get_segment_path(self, chapter: Chapter, segment_idx: int) -> str:
         """個別の音声セグメントファイルのパスを返します"""
-        chapter_dir = self._get_chapter_dir(chapter_no)
-        return f"{chapter_dir}/{self.episode_name}_{chapter_no}_{segment_idx}.wav"
+        chapter_dir = chapter.get_chapter_dir(self.episode_name)
+        # Keep using f-string for now for consistency within this file
+        return f"{chapter_dir}/{self.episode_name}_{chapter.no}_{segment_idx}.wav"
 
     def _synthesize_segment(self, segment: Segment, wav_output_path: str) -> None:
         """1つのセグメントの音声を合成してファイルに保存します"""
@@ -48,13 +42,13 @@ class AudioSynthesizer:
         return segment.speaker or prev_speaker
 
     def _process_segments(
-        self, segments: List[Segment], chapter_no: str, prev_speaker: str
+        self, chapter: Chapter, prev_speaker: str
     ) -> str:
         """チャプター内の各セグメントを処理し、最後のspeakerを返します"""
-        for idx, segment in enumerate(segments):
+        for idx, segment in enumerate(chapter.segments):
             speaker = self._get_speaker_for_segment(segment, prev_speaker)
             segment.speaker = speaker  # 話者情報を更新
-            wav_output_path = self._get_segment_path(chapter_no, idx)
+            wav_output_path = self._get_segment_path(chapter, idx)
 
             # ファイルが既に存在する場合はスキップ
             if os.path.exists(wav_output_path):
@@ -69,11 +63,11 @@ class AudioSynthesizer:
 
     def _process_chapter(self, chapter: Chapter, prev_speaker: str) -> str:
         """チャプターを処理し、最後のspeakerを返します"""
-        chapter_dir = self._get_chapter_dir(chapter.no)
+        chapter_dir = chapter.get_chapter_dir(self.episode_name)
         os.makedirs(chapter_dir, exist_ok=True)
 
         prev_speaker = self._process_segments(
-            chapter.segments, chapter.no, prev_speaker
+            chapter, prev_speaker
         )
         self.concatenate_chapter_audio(chapter, chapter_dir)
         return prev_speaker
