@@ -2,6 +2,7 @@ from dataclasses import dataclass, asdict
 from typing import List
 import json
 from pathlib import Path
+import os
 
 
 @dataclass
@@ -67,5 +68,6 @@ class Transcript:
 
     def save_to_json(self, file_path: str | Path) -> None:
         """Transcriptオブジェクトをファイルに保存します"""
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
         with open(file_path, "w", encoding="utf-8") as f:
             json.dump(self.to_dict(), f, ensure_ascii=False, indent=2)
