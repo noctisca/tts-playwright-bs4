@@ -31,29 +31,32 @@ class Chapter:
         """セグメントの数を返します"""
         return len(self.segments)
 
-
+    
 @dataclass
 class Transcript:
     """ポッドキャストの書き起こし全体を表現するクラス"""
-
     chapters: List[Chapter]
+    episode_name: str
 
     @classmethod
-    def from_dict(cls, data: List[dict]) -> "Transcript":
+    def from_dict(cls, data: List[dict], episode_name: str) -> "Transcript":
         """JSONから読み込んだ辞書データからTranscriptオブジェクトを生成します"""
         chapters = []
         for chapter_data in data:
             segments = [
-                Segment(speaker=segment["speaker"], text=segment["text"])
+                Segment(
+                    speaker=segment["speaker"],
+                    text=segment["text"]
+                )
                 for segment in chapter_data["segments"]
             ]
             chapter = Chapter(
                 no=chapter_data["no"],
                 title=chapter_data.get("title", ""),  # titleが無い場合は空文字を使用
-                segments=segments,
+                segments=segments
             )
             chapters.append(chapter)
-        return cls(chapters=chapters)
+        return cls(chapters=chapters, episode_name=episode_name)
 
     def to_dict(self) -> List[dict]:
         """Transcriptオブジェクトを辞書形式に変換します"""
@@ -62,9 +65,10 @@ class Transcript:
     @classmethod
     def load_from_json(cls, file_path: str | Path) -> "Transcript":
         """JSONファイルからTranscriptオブジェクトを読み込みます"""
+        episode_name = Path(file_path).stem
         with open(file_path, "r", encoding="utf-8") as f:
             data = json.load(f)
-            return cls.from_dict(data)
+            return cls.from_dict(data, episode_name)
 
     def save_to_json(self, file_path: str | Path) -> None:
         """Transcriptオブジェクトをファイルに保存します"""

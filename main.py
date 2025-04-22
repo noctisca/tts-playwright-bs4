@@ -30,7 +30,7 @@ async def main(url: str) -> None:
 
         # コンテンツが抽出できたら保存
         if transcript_data:
-            transcript = Transcript.from_dict(transcript_data)
+            transcript = Transcript.from_dict(transcript_data, episode_name)
             transcript.save_to_json(json_file_path)
             print(f"Content from {url} has been saved to {json_file_path}")
         else:
