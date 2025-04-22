@@ -35,9 +35,7 @@ class AudioSynthesizer:
         """セグメントの話者を決定します。空の場合は前の話者を使用します"""
         return segment.speaker or prev_speaker
 
-    def _process_segments(
-        self, chapter: Chapter, prev_speaker: str
-    ) -> str:
+    def _process_segments(self, chapter: Chapter, prev_speaker: str) -> str:
         """チャプター内の各セグメントを処理し、最後のspeakerを返します"""
         for idx, segment in enumerate(chapter.segments):
             speaker = self._get_speaker_for_segment(segment, prev_speaker)
@@ -60,9 +58,7 @@ class AudioSynthesizer:
         chapter_dir = chapter.get_chapter_dir(self.episode_name)
         os.makedirs(chapter_dir, exist_ok=True)
 
-        prev_speaker = self._process_segments(
-            chapter, prev_speaker
-        )
+        prev_speaker = self._process_segments(chapter, prev_speaker)
         self.concatenate_chapter_audio(chapter, chapter_dir)
         return prev_speaker
 
