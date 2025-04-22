@@ -36,16 +36,40 @@ class AudioSynthesizer:
             f"{output_dir}/{self.episode_name}-chapter-{chapter_no}-{chapter_title}.wav"
         )
 
+    def _synthesize_segment(
+        self, text: str, speaker: str, wav_output_path: str
+    ) -> None:
+        """1つのセグメントの音声を合成してファイルに保存します"""
+        speaker_id = self.voicevox.get_speaker_id(speaker)
+        query_data = self.voicevox.create_audio_query(text, speaker_id)
+        if query_data is None:
+            raise RuntimeError(
+                f"VOICEVOXのaudio_query APIが失敗しました。テキスト: {text[:100]}..."
+            )
+
+        audio_content = self.voicevox.synthesize_audio(query_data, speaker_id)
+        if audio_content is not None:
+            with open(wav_output_path, "wb") as wav_file:
+                wav_file.write(audio_content)
+            print(f"Generated audio: {wav_output_path}")
+        else:
+            raise RuntimeError(
+                f"VOICEVOXのsynthesis APIが失敗しました。テキスト: {text[:100]}..."
+            )
+
+    def _get_speaker_for_segment(
+        self, segment: Dict[str, Any], prev_speaker: str
+    ) -> str:
+        """セグメントの話者を決定します。空の場合は前の話者を使用します"""
+        return segment["speaker"] or prev_speaker
+
     def _process_segments(
         self, segments: List[Dict[str, Any]], chapter_no: str, prev_speaker: str
     ) -> str:
         """チャプター内の各セグメントを処理し、最後のspeakerを返します"""
         for idx, segment in enumerate(segments):
-            speaker = segment["speaker"]
             text = segment["text"]
-            if speaker == "":
-                speaker = prev_speaker
-
+            speaker = self._get_speaker_for_segment(segment, prev_speaker)
             wav_output_path = self._get_segment_path(chapter_no, idx)
 
             # ファイルが既に存在する場合はスキップ
@@ -54,23 +78,7 @@ class AudioSynthesizer:
                 prev_speaker = speaker
                 continue
 
-            speaker_id = self.voicevox.get_speaker_id(speaker)
-            query_data = self.voicevox.create_audio_query(text, speaker_id)
-            if query_data is None:
-                raise RuntimeError(
-                    f"VOICEVOXのaudio_query APIが失敗しました。テキスト: {text[:100]}..."
-                )
-
-            audio_content = self.voicevox.synthesize_audio(query_data, speaker_id)
-            if audio_content is not None:
-                with open(wav_output_path, "wb") as wav_file:
-                    wav_file.write(audio_content)
-                print(f"Generated audio: {wav_output_path}")
-            else:
-                raise RuntimeError(
-                    f"VOICEVOXのsynthesis APIが失敗しました。テキスト: {text[:100]}..."
-                )
-
+            self._synthesize_segment(text, speaker, wav_output_path)
             prev_speaker = speaker
 
         return prev_speaker
