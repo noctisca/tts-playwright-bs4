@@ -3,6 +3,7 @@ import json
 from pydub import AudioSegment
 import re
 from voicevox_client import VoicevoxClient
+from typing import List, Dict, Any
 
 
 class AudioSynthesizer:
@@ -10,7 +11,7 @@ class AudioSynthesizer:
     BASE_DIR = "voicevox"
     PODCAST_DIR = f"{BASE_DIR}/lex-fridman-podcast"
 
-    def __init__(self, episode_name):
+    def __init__(self, episode_name: str):
         self.episode_name = episode_name
         self.voicevox = VoicevoxClient()
 
@@ -30,7 +31,7 @@ class AudioSynthesizer:
             f"{output_dir}/{self.episode_name}-chapter-{chapter_no}-{chapter_title}.wav"
         )
 
-    def synthesize_from_json(self, json_file):
+    def synthesize_from_json(self, json_file: str) -> None:
         with open(json_file, "r", encoding="utf-8") as f:
             data = json.load(f)
 
@@ -76,14 +77,16 @@ class AudioSynthesizer:
 
             self.concatenate_chapter_audio(chapter, chapter_dir)
 
-    def concatenate_chapter_audio(self, chapter, chapter_dir):
-        def extract_idx(filename):
+    def concatenate_chapter_audio(
+        self, chapter: Dict[str, Any], chapter_dir: str
+    ) -> None:
+        def extract_idx(filename: str) -> int:
             match = re.search(
                 rf"{self.episode_name}_{chapter['no']}_(\d+)\.wav$", filename
             )
             return int(match.group(1)) if match else -1
 
-        wav_files = [
+        wav_files: List[str] = [
             os.path.join(chapter_dir, file)
             for file in sorted(os.listdir(chapter_dir), key=extract_idx)
             if file.startswith(f"{self.episode_name}_{chapter['no']}_")
