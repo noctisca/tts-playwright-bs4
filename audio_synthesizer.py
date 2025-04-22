@@ -36,13 +36,10 @@ class AudioSynthesizer:
             f"{output_dir}/{self.episode_name}-chapter-{chapter_no}-{chapter_title}.wav"
         )
 
-    def _process_chapter(self, chapter: Dict[str, Any], prev_speaker: str) -> str:
-        """チャプターの各セグメントを処理し、最後のspeakerを返します"""
-        chapter_no = chapter["no"]
-        segments = chapter["segments"]
-        chapter_dir = self._get_chapter_dir(chapter_no)
-        os.makedirs(chapter_dir, exist_ok=True)
-
+    def _process_segments(
+        self, segments: List[Dict[str, Any]], chapter_no: str, prev_speaker: str
+    ) -> str:
+        """チャプター内の各セグメントを処理し、最後のspeakerを返します"""
         for idx, segment in enumerate(segments):
             speaker = segment["speaker"]
             text = segment["text"]
@@ -76,6 +73,17 @@ class AudioSynthesizer:
 
             prev_speaker = speaker
 
+        return prev_speaker
+
+    def _process_chapter(self, chapter: Dict[str, Any], prev_speaker: str) -> str:
+        """チャプターを処理し、最後のspeakerを返します"""
+        chapter_no = chapter["no"]
+        chapter_dir = self._get_chapter_dir(chapter_no)
+        os.makedirs(chapter_dir, exist_ok=True)
+
+        prev_speaker = self._process_segments(
+            chapter["segments"], chapter_no, prev_speaker
+        )
         self.concatenate_chapter_audio(chapter, chapter_dir)
         return prev_speaker
 
