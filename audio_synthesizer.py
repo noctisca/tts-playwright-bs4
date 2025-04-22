@@ -14,6 +14,22 @@ class AudioSynthesizer:
         self.episode_name = episode_name
         self.voicevox = VoicevoxClient()
 
+    def _get_chapter_dir(self, chapter_no: str) -> str:
+        """チャプターの音声ファイルを格納するディレクトリのパスを返します"""
+        return f"{self.BASE_DIR}/{self.episode_name}/chapter-{chapter_no}"
+
+    def _get_segment_path(self, chapter_no: str, segment_idx: int) -> str:
+        """個別の音声セグメントファイルのパスを返します"""
+        chapter_dir = self._get_chapter_dir(chapter_no)
+        return f"{chapter_dir}/{self.episode_name}_{chapter_no}_{segment_idx}.wav"
+
+    def _get_combined_output_path(self, chapter_no: str, chapter_title: str) -> str:
+        """結合後の音声ファイルの出力パスを返します"""
+        output_dir = f"{self.PODCAST_DIR}/{self.episode_name}"
+        return (
+            f"{output_dir}/{self.episode_name}-chapter-{chapter_no}-{chapter_title}.wav"
+        )
+
     def synthesize_from_json(self, json_file):
         with open(json_file, "r", encoding="utf-8") as f:
             data = json.load(f)
@@ -22,7 +38,7 @@ class AudioSynthesizer:
         for chapter in data:
             chapter_no = chapter["no"]
             segments = chapter["segments"]
-            chapter_dir = f"{self.BASE_DIR}/{self.episode_name}/chapter-{chapter_no}"
+            chapter_dir = self._get_chapter_dir(chapter_no)
             os.makedirs(chapter_dir, exist_ok=True)
 
             for idx, segment in enumerate(segments):
@@ -31,9 +47,7 @@ class AudioSynthesizer:
                 if speaker == "":
                     speaker = prev_speaker
 
-                wav_output_path = (
-                    f"{chapter_dir}/{self.episode_name}_{chapter_no}_{idx}.wav"
-                )
+                wav_output_path = self._get_segment_path(chapter_no, idx)
 
                 # ファイルが既に存在する場合はスキップ
                 if os.path.exists(wav_output_path):
@@ -78,12 +92,9 @@ class AudioSynthesizer:
         combined_audio = AudioSegment.empty()
         for wav_file in wav_files:
             combined_audio += AudioSegment.from_wav(wav_file)
-        output_dir = f"{self.PODCAST_DIR}/{self.episode_name}"
-        os.makedirs(output_dir, exist_ok=True)
-        chapter_title = chapter["title"]
-        chapter_no = chapter["no"]
-        output_path = (
-            f"{output_dir}/{self.episode_name}-chapter-{chapter_no}-{chapter_title}.wav"
-        )
+
+        output_path = self._get_combined_output_path(chapter["no"], chapter["title"])
+        os.makedirs(os.path.dirname(output_path), exist_ok=True)
+
         combined_audio.export(output_path, format="wav")
-        print(f"Saved combined audio for chapter {chapter_no}: {output_path}")
+        print(f"Saved combined audio for chapter {chapter['no']}: {output_path}")
