@@ -12,7 +12,10 @@ async def main(url: str) -> None:
     episode_name = extract_episode_name_from_url(url)
     json_file_path = f"output/{episode_name}.json"
 
-    if not os.path.exists(json_file_path):
+    if os.path.exists(json_file_path):
+        print(f"既存のJSONファイルが見つかりました: {json_file_path}")
+        transcript = Transcript.load_from_json(json_file_path)
+    else:
         translate_url = (
             f"https://translate.google.com/translate?sl=auto&tl=ja&hl=ja&u={url}"
         )
@@ -34,9 +37,6 @@ async def main(url: str) -> None:
         else:
             print(f"Could not find content with class 'entry-content' on {url}.")
             return
-    else:
-        print(f"既存のJSONファイルが見つかりました: {json_file_path}")
-        transcript = Transcript.load_from_json(json_file_path)
 
     synthesizer = AudioSynthesizer(episode_name)
     synthesizer.synthesize_from_transcript(transcript)
