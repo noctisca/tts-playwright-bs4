@@ -36,50 +36,55 @@ class AudioSynthesizer:
             f"{output_dir}/{self.episode_name}-chapter-{chapter_no}-{chapter_title}.wav"
         )
 
+    def _process_chapter(self, chapter: Dict[str, Any], prev_speaker: str) -> str:
+        """チャプターの各セグメントを処理し、最後のspeakerを返します"""
+        chapter_no = chapter["no"]
+        segments = chapter["segments"]
+        chapter_dir = self._get_chapter_dir(chapter_no)
+        os.makedirs(chapter_dir, exist_ok=True)
+
+        for idx, segment in enumerate(segments):
+            speaker = segment["speaker"]
+            text = segment["text"]
+            if speaker == "":
+                speaker = prev_speaker
+
+            wav_output_path = self._get_segment_path(chapter_no, idx)
+
+            # ファイルが既に存在する場合はスキップ
+            if os.path.exists(wav_output_path):
+                print(f"Skipping existing file: {wav_output_path}")
+                prev_speaker = speaker
+                continue
+
+            speaker_id = self.voicevox.get_speaker_id(speaker)
+            query_data = self.voicevox.create_audio_query(text, speaker_id)
+            if query_data is None:
+                raise RuntimeError(
+                    f"VOICEVOXのaudio_query APIが失敗しました。テキスト: {text[:100]}..."
+                )
+
+            audio_content = self.voicevox.synthesize_audio(query_data, speaker_id)
+            if audio_content is not None:
+                with open(wav_output_path, "wb") as wav_file:
+                    wav_file.write(audio_content)
+                print(f"Generated audio: {wav_output_path}")
+            else:
+                raise RuntimeError(
+                    f"VOICEVOXのsynthesis APIが失敗しました。テキスト: {text[:100]}..."
+                )
+
+            prev_speaker = speaker
+
+        self.concatenate_chapter_audio(chapter, chapter_dir)
+        return prev_speaker
+
     def synthesize_from_json(self, json_file: str) -> None:
         chapters = self._load_chapters(json_file)
-
         prev_speaker = VoicevoxClient.HOST_NAME
+
         for chapter in chapters:
-            chapter_no = chapter["no"]
-            segments = chapter["segments"]
-            chapter_dir = self._get_chapter_dir(chapter_no)
-            os.makedirs(chapter_dir, exist_ok=True)
-
-            for idx, segment in enumerate(segments):
-                speaker = segment["speaker"]
-                text = segment["text"]
-                if speaker == "":
-                    speaker = prev_speaker
-
-                wav_output_path = self._get_segment_path(chapter_no, idx)
-
-                # ファイルが既に存在する場合はスキップ
-                if os.path.exists(wav_output_path):
-                    print(f"Skipping existing file: {wav_output_path}")
-                    prev_speaker = speaker
-                    continue
-
-                speaker_id = self.voicevox.get_speaker_id(speaker)
-                query_data = self.voicevox.create_audio_query(text, speaker_id)
-                if query_data is None:
-                    raise RuntimeError(
-                        f"VOICEVOXのaudio_query APIが失敗しました。テキスト: {text[:100]}..."
-                    )
-
-                audio_content = self.voicevox.synthesize_audio(query_data, speaker_id)
-                if audio_content is not None:
-                    with open(wav_output_path, "wb") as wav_file:
-                        wav_file.write(audio_content)
-                    print(f"Generated audio: {wav_output_path}")
-                else:
-                    raise RuntimeError(
-                        f"VOICEVOXのsynthesis APIが失敗しました。テキスト: {text[:100]}..."
-                    )
-
-                prev_speaker = speaker
-
-            self.concatenate_chapter_audio(chapter, chapter_dir)
+            prev_speaker = self._process_chapter(chapter, prev_speaker)
 
     def concatenate_chapter_audio(
         self, chapter: Dict[str, Any], chapter_dir: str
