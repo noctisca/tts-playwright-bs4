@@ -5,6 +5,7 @@ from .voicevox_client import VoicevoxClient
 from .file_manager import AudioFileManager
 from typing import List
 from src.data_models.transcript_models import Transcript, Chapter, Segment
+from google.cloud import texttospeech  # Google TTS import
 
 
 class AudioSynthesizer:
@@ -14,6 +15,13 @@ class AudioSynthesizer:
         self.podcast_name = podcast_name
         self.voicevox = VoicevoxClient()
         self.file_manager = AudioFileManager(episode_name, podcast_name)
+        # Google TTS Client (assuming GOOGLE_APPLICATION_CREDENTIALS env var is set)
+        try:
+            self.google_tts_client = texttospeech.TextToSpeechClient()
+        except Exception as e:
+            print(f"Failed to initialize Google TTS client: {e}")
+            print("Please ensure GOOGLE_APPLICATION_CREDENTIALS environment variable is set correctly.")
+            self.google_tts_client = None
 
     def _synthesize_segment(self, segment: Segment, wav_output_path: str) -> None:
         """1つのセグメントの音声を合成してファイルに保存します"""
@@ -33,6 +41,41 @@ class AudioSynthesizer:
                 f"VOICEVOXのsynthesis APIが失敗しました。テキスト: {segment.text[:100]}..."
             )
 
+    def _synthesize_segment_google(self, segment: Segment, wav_output_path: str) -> None:
+        """1つのセグメントの音声をGoogle TTSで合成してファイルに保存します"""
+        if not self.google_tts_client:
+            raise RuntimeError("Google TTS client is not initialized.")
+
+        synthesis_input = texttospeech.SynthesisInput(text=segment.text)
+
+        # Select voice based on role
+        if segment.is_host():
+            voice_name = "ja-JP-Standard-B"  # Host voice
+        else:
+            voice_name = "ja-JP-Standard-D"  # Guest voice
+
+        voice = texttospeech.VoiceSelectionParams(
+            language_code="ja-JP", name=voice_name
+        )
+
+        audio_config = texttospeech.AudioConfig(
+            audio_encoding=texttospeech.AudioEncoding.LINEAR16  # WAV format
+        )
+
+        try:
+            response = self.google_tts_client.synthesize_speech(
+                input=synthesis_input, voice=voice, audio_config=audio_config
+            )
+
+            with open(wav_output_path, "wb") as out:
+                out.write(response.audio_content)
+            print(f"Generated Google TTS audio: {wav_output_path}")
+
+        except Exception as e:
+            raise RuntimeError(
+                f"Google TTS synthesis API failed. Text: {segment.text[:100]}... Error: {e}"
+            )
+
     def _process_segments(self, chapter: Chapter) -> None:
         """チャプター内の各セグメントを処理します"""
         for idx, segment in enumerate(chapter.segments):
@@ -43,7 +86,7 @@ class AudioSynthesizer:
                 print(f"Skipping existing file: {wav_output_path}")
                 continue
 
-            self._synthesize_segment(segment, wav_output_path)
+            self._synthesize_segment_google(segment, wav_output_path)
 
     def _process_chapter(self, chapter: Chapter) -> None:
         """チャプターを処理します"""
