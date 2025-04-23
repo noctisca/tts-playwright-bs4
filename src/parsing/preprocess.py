@@ -1,8 +1,9 @@
 import json
 import os
+from src.data_models.transcript_utils import transcript_from_dict, transcript_to_dict
+from src.data_models.transcript_models import Transcript
+from typing import Dict, List, Any
 
-
-from typing import Dict, List, Any # 型ヒントのために追加
 
 def preprocess_data(file_path: str) -> List[Dict[str, Any]] | None:
     """
@@ -23,29 +24,26 @@ def preprocess_data(file_path: str) -> List[Dict[str, Any]] | None:
             data = json.load(f)
         print(f"データを読み込みました: {file_path}")
 
+        # データモデル化
+        transcript = transcript_from_dict(
+            data, os.path.splitext(os.path.basename(file_path))[0]
+        )
+
         # 前処理ロジック
-        if isinstance(data, list): # データがチャプターのリストであることを想定
-            for chapter in data:
-                last_speaker = None
-                if isinstance(chapter.get("segments"), list): # 各チャプターがsegmentsリストを持つことを想定
-                    for segment in chapter["segments"]:
-                        # speakerが空文字列の場合、直前のspeakerをコピー
-                        if segment.get("speaker") == "" and last_speaker is not None:
-                            segment["speaker"] = last_speaker
+        for chapter in transcript.chapters:
+            last_speaker = None
+            for segment in chapter.segments:
+                if segment.speaker == "" and last_speaker is not None:
+                    segment.speaker = last_speaker
+                if segment.speaker == "レックス・フリードマン":
+                    segment.role = segment.role.__class__("host")
+                else:
+                    segment.role = segment.role.__class__("guest")
+                if segment.speaker != "":
+                    last_speaker = segment.speaker
 
-                        # speakerに基づいてroleを設定
-                        if segment.get("speaker") == "レックス・フリードマン":
-                            segment["role"] = "host"
-                        else:
-                            segment["role"] = "guest"
-
-                        # 現在のspeakerを次のセグメントのために保持
-                        if segment.get("speaker") != "":
-                            last_speaker = segment.get("speaker")
-            return data # リスト形式のデータを返す
-        else:
-            print(f"警告: 予期しないデータ形式です (リストではありません) - {file_path}")
-            return None # リスト形式でない場合はNoneを返す
+        # dictに戻して返す
+        return transcript_to_dict(transcript)
 
     except json.JSONDecodeError:
         print(f"エラー: JSONファイルの読み込みに失敗しました - {file_path}")
