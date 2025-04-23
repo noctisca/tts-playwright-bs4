@@ -16,7 +16,7 @@ class VoicevoxClient:
 
     def create_audio_query(self, text: str, segment) -> dict | None:
         """VOICEVOXのaudio_query APIを呼び出してクエリデータを取得します"""
-        speaker_id = self.get_speaker_id(segment)
+        speaker_id = self._get_speaker_id(segment)
         query_url = f"{self.base_url}/audio_query?speaker={speaker_id}"
 
         # 長いテキストの場合は待機時間を入れる
@@ -36,7 +36,7 @@ class VoicevoxClient:
 
     def synthesize_audio(self, query_data: dict, segment) -> bytes | None:
         """VOICEVOXのsynthesis APIを呼び出して音声データを生成します"""
-        speaker_id = self.get_speaker_id(segment)
+        speaker_id = self._get_speaker_id(segment)
         synthesis_url = f"{self.base_url}/synthesis?speaker={speaker_id}"
 
         response = requests.post(
@@ -50,8 +50,8 @@ class VoicevoxClient:
             return None
 
     @staticmethod
-    def get_speaker_id(segment) -> str:
-        """SegmentからVOICEVOXのspeaker_idを取得します"""
+    def _get_speaker_id(segment) -> str:
+        """SegmentからVOICEVOXのspeaker_idを取得します（内部用）"""
         return (
             VoicevoxClient.HOST_SPEAKER_ID
             if segment.is_host()
