@@ -35,7 +35,7 @@ class AudioSynthesizer:
     def _process_segments(self, chapter: Chapter) -> None:
         """チャプター内の各セグメントを処理します"""
         for idx, segment in enumerate(chapter.segments):
-            wav_output_path = chapter.get_segment_path(self.episode_name, idx)
+            wav_output_path = self.file_manager.get_segment_path(chapter.no, idx)
 
             # ファイルが既に存在する場合はスキップ
             if os.path.exists(wav_output_path):
@@ -46,7 +46,7 @@ class AudioSynthesizer:
 
     def _process_chapter(self, chapter: Chapter) -> None:
         """チャプターを処理します"""
-        chapter_dir = chapter.get_chapter_dir(self.episode_name)
+        chapter_dir = self.file_manager.get_chapter_dir(chapter.no)
         os.makedirs(chapter_dir, exist_ok=True)
 
         self._process_segments(chapter)
