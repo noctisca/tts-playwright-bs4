@@ -2,7 +2,9 @@ import json
 import os
 
 
-def preprocess_data(file_path: str):
+from typing import Dict, List, Any # 型ヒントのために追加
+
+def preprocess_data(file_path: str) -> List[Dict[str, Any]] | None:
     """
     スクレイピング後のJSONデータを読み込み、前処理を行う.
 
@@ -10,7 +12,7 @@ def preprocess_data(file_path: str):
         file_path: 前処理対象のJSONファイルのパス.
 
     Returns:
-        前処理後のデータ.
+        前処理後のデータ (チャプターのリスト形式). エラーが発生した場合は None.
     """
     if not os.path.exists(file_path):
         print(f"エラー: ファイルが見つかりません - {file_path}")
@@ -40,8 +42,11 @@ def preprocess_data(file_path: str):
                         # 現在のspeakerを次のセグメントのために保持
                         if segment.get("speaker") != "":
                             last_speaker = segment.get("speaker")
+            return data # リスト形式のデータを返す
+        else:
+            print(f"警告: 予期しないデータ形式です (リストではありません) - {file_path}")
+            return None # リスト形式でない場合はNoneを返す
 
-        return data
     except json.JSONDecodeError:
         print(f"エラー: JSONファイルの読み込みに失敗しました - {file_path}")
         return None
