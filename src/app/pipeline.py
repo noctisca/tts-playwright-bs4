@@ -41,7 +41,7 @@ async def get_raw_data(url: str, episode_name: str) -> str | None:
         save_json(transcript_data, raw_data_file_path)
     except Exception as e:
         print(f"ファイル保存に失敗しました: {raw_data_file_path} ({e})")
-        return None
+        raise
 
     print(f"Content from {url} has been saved to {raw_data_file_path}")
     return raw_data_file_path
@@ -75,7 +75,7 @@ def preprocess_and_save(raw_data_file_path: str, episode_name: str) -> str | Non
         save_json(preprocessed_data, preprocessed_json_file_path)
     except Exception as e:
         print(f"前処理結果の保存に失敗しました: {e}")
-        return None
+        raise
 
     print(f"前処理結果を保存しました: {preprocessed_json_file_path}")
     return preprocessed_json_file_path
