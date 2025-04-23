@@ -9,10 +9,11 @@ from src.data_models.transcript_models import Transcript, Chapter, Segment
 
 class AudioSynthesizer:
 
-    def __init__(self, episode_name: str):
+    def __init__(self, episode_name: str, podcast_name: str):
         self.episode_name = episode_name
+        self.podcast_name = podcast_name
         self.voicevox = VoicevoxClient()
-        self.file_manager = AudioFileManager(episode_name)
+        self.file_manager = AudioFileManager(episode_name, podcast_name)
 
     def _synthesize_segment(self, segment: Segment, wav_output_path: str) -> None:
         """1つのセグメントの音声を合成してファイルに保存します"""

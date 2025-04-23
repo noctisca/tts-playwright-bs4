@@ -93,7 +93,7 @@ def _synthesize_episode_audio(transcript: Transcript, episode_name: str) -> None
     """
     Transcriptオブジェクトから音声合成を実行する。
     """
-    synthesizer = AudioSynthesizer(episode_name)
+    synthesizer = AudioSynthesizer(episode_name, transcript.podcast_name)
     synthesizer.synthesize_from_transcript(transcript)
 
 

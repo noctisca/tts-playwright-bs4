@@ -29,3 +29,4 @@ class Chapter:
 class Transcript:
     chapters: List[Chapter]
     episode_name: str
+    podcast_name: str = "lex-fridman-podcast"
