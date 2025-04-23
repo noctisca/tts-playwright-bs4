@@ -15,13 +15,6 @@ def save_json(data, filename):
         return None
 
 
-def save_to_file(content, filename="output/noname.json"):
-    """取得したコンテンツをファイルに保存"""
-    os.makedirs(os.path.dirname(filename), exist_ok=True)  # 保存先のディレクトリを作成
-    with open(filename, "w", encoding="utf-8") as f:
-        json.dump(content, f, ensure_ascii=False, indent=2)
-
-
 def extract_episode_name_from_url(url):
     parsed_url = urlparse(url)
     path_parts = parsed_url.path.strip("/").split("-")
