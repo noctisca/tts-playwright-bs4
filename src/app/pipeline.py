@@ -3,7 +3,7 @@ import json
 import asyncio
 from src.parsing.scraper import WebScraper
 from src.parsing.parser import HTMLParser
-from src.utils.utils import extract_episode_name_from_url
+from src.utils.utils import extract_episode_name_from_url, save_json
 from src.audio.audio_synthesizer import AudioSynthesizer
 from src.data_models.transcript_utils import (
     transcript_from_dict,
@@ -37,8 +37,9 @@ async def get_raw_data(url: str, episode_name: str) -> str | None:
         print(f"Could not find content with class 'entry-content' on {url}.")
         return None
 
-    with open(raw_data_file_path, "w", encoding="utf-8") as f:
-        json.dump(transcript_data, f, ensure_ascii=False, indent=2)
+    result = save_json(transcript_data, raw_data_file_path)
+    if result is None:
+        return None
 
     print(f"Content from {url} has been saved to {raw_data_file_path}")
     return raw_data_file_path
@@ -68,13 +69,11 @@ def preprocess_and_save(raw_data_file_path: str, episode_name: str) -> str | Non
 
     print("前処理が完了しました。")
 
-    try:
-        with open(preprocessed_json_file_path, "w", encoding="utf-8") as f:
-            json.dump(preprocessed_data, f, ensure_ascii=False, indent=2)
-        print(f"前処理結果を保存しました: {preprocessed_json_file_path}")
-    except Exception as e:
-        print(f"前処理結果の保存に失敗しました: {e}")
+    result = save_json(preprocessed_data, preprocessed_json_file_path)
+    if result is None:
         return None
+
+    print(f"前処理結果を保存しました: {preprocessed_json_file_path}")
     return preprocessed_json_file_path
 
 
