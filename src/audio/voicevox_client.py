@@ -20,13 +20,6 @@ class VoicevoxClient:
         query_url = f"{self.base_url}/audio_query?speaker={speaker_id}"
         text = segment.text
 
-        # 長いテキストの場合は待機時間を入れる
-        if len(text) >= self.LONG_TEXT_THRESHOLD:
-            print(
-                f"****** Long text detected ({len(text)} chars). Waiting 1 second... ******"
-            )
-            time.sleep(1)
-
         response = requests.post(query_url, params={"text": text})
 
         if response.status_code == 200:
@@ -39,6 +32,13 @@ class VoicevoxClient:
         """VOICEVOXのsynthesis APIを呼び出して音声データを生成します"""
         speaker_id = self._get_speaker_id(segment)
         synthesis_url = f"{self.base_url}/synthesis?speaker={speaker_id}"
+        text = segment.text
+
+        if len(text) >= self.LONG_TEXT_THRESHOLD:
+            print(
+                f"****** Long text detected ({len(text)} chars). Waiting 1 second... ******"
+            )
+            time.sleep(1)
 
         response = requests.post(
             synthesis_url, headers={"Content-Type": "application/json"}, json=query_data
