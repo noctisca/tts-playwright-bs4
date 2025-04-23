@@ -5,9 +5,11 @@ from pathlib import Path
 import os
 from enum import Enum
 
+
 class Role(Enum):
-    HOST = 'host'
-    GUEST = 'guest'
+    HOST = "host"
+    GUEST = "guest"
+
 
 @dataclass
 class Segment:
@@ -16,6 +18,7 @@ class Segment:
     speaker: str
     role: Role
     text: str
+
 
 @dataclass
 class Chapter:
@@ -38,7 +41,9 @@ class Chapter:
     def get_combined_output_path(self, episode_name: str) -> str:
         """結合後の音声ファイルの出力パスを返します"""
         output_dir = os.path.join(self.BASE_DIR, "lex-fridman-podcast", episode_name)
-        return os.path.join(output_dir, f"{episode_name}-chapter-{self.no}-{self.title}.wav")
+        return os.path.join(
+            output_dir, f"{episode_name}-chapter-{self.no}-{self.title}.wav"
+        )
 
 
 @dataclass
@@ -54,7 +59,11 @@ class Transcript:
         chapters = []
         for chapter_data in data:
             segments = [
-                Segment(speaker=segment["speaker"], role=segment['role'], text=segment["text"])
+                Segment(
+                    speaker=segment["speaker"],
+                    role=segment["role"],
+                    text=segment["text"],
+                )
                 for segment in chapter_data["segments"]
             ]
             chapter = Chapter(
