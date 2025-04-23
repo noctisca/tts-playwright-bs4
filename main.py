@@ -70,7 +70,7 @@ def preprocess_and_load_transcript(raw_data_file_path: str, episode_name: str) -
         # 前処理結果を一時ファイルに保存
         try:
             with open(preprocessed_json_file_path, "w", encoding="utf-8") as f:
-                json.dump(preprocessed_data, f, indent=2)
+                json.dump(preprocessed_data, f, ensure_ascii=False, indent=2)
             print(f"前処理結果を保存しました: {preprocessed_json_file_path}")
         except Exception as e:
             print(f"前処理結果の保存に失敗しました: {e}")
@@ -88,7 +88,6 @@ def synthesize_episode_audio(transcript: Transcript, episode_name: str) -> None:
     # 前処理後のtranscriptオブジェクトを後続処理に渡す
     synthesizer = AudioSynthesizer(episode_name)
     synthesizer.synthesize_from_transcript(transcript)
-
 
 async def main(url: str) -> None:
     episode_name = extract_episode_name_from_url(url)
