@@ -47,46 +47,45 @@ async def get_raw_data(url: str, episode_name: str) -> str | None:
             return None
 
 
-def preprocess_and_load_transcript(
-    raw_data_file_path: str, episode_name: str
-) -> Transcript | None:
+def preprocess_and_save(raw_data_file_path: str, episode_name: str) -> str | None:
     """
-    生データファイルからデータを読み込み、前処理を行い、Transcriptオブジェクトを生成する。
-    前処理済みファイルがあればそれを読み込む。
+    生データファイルからデータを読み込み、前処理を行い、前処理済みデータをファイルに保存する。
+    保存したファイルパスを返す。
     """
     preprocessed_json_file_path = os.path.join(
         "output", f"{episode_name}_preprocessed.json"
     )
 
-    # 前処理済みファイルが存在するか確認
     if os.path.exists(preprocessed_json_file_path):
         print(
             f"既存の前処理済みファイルが見つかりました: {preprocessed_json_file_path}"
         )
-        # 既存ファイルからTranscriptを読み込む
-        transcript = transcript_load_from_json(preprocessed_json_file_path)
-        return transcript
-    else:
-        # 前処理の呼び出し
-        print(f"前処理を開始します: {raw_data_file_path}")
-        preprocessed_data = preprocess_data(raw_data_file_path)
-        if preprocessed_data is None:
-            print("前処理に失敗しました。処理を中断します。")
-            return None
-        print("前処理が完了しました。")
+        return preprocessed_json_file_path
 
-        # 前処理結果を一時ファイルに保存
-        try:
-            with open(preprocessed_json_file_path, "w", encoding="utf-8") as f:
-                json.dump(preprocessed_data, f, ensure_ascii=False, indent=2)
-            print(f"前処理結果を保存しました: {preprocessed_json_file_path}")
-        except Exception as e:
-            print(f"前処理結果の保存に失敗しました: {e}")
-            return None
+    print(f"前処理を開始します: {raw_data_file_path}")
+    preprocessed_data = preprocess_data(raw_data_file_path)
 
-        # 前処理結果の一時ファイルからTranscriptを読み込む
-        transcript = transcript_load_from_json(preprocessed_json_file_path)
-        return transcript
+    if preprocessed_data is None:
+        print("前処理に失敗しました。処理を中断します。")
+        return None
+
+    print("前処理が完了しました。")
+
+    try:
+        with open(preprocessed_json_file_path, "w", encoding="utf-8") as f:
+            json.dump(preprocessed_data, f, ensure_ascii=False, indent=2)
+        print(f"前処理結果を保存しました: {preprocessed_json_file_path}")
+    except Exception as e:
+        print(f"前処理結果の保存に失敗しました: {e}")
+        return None
+    return preprocessed_json_file_path
+
+
+def load_transcript(preprocessed_json_file_path: str) -> Transcript:
+    """
+    前処理済みファイルからTranscriptモデルをロードする
+    """
+    return transcript_load_from_json(preprocessed_json_file_path)
 
 
 def synthesize_episode_audio(transcript: Transcript, episode_name: str) -> None:
@@ -105,10 +104,13 @@ async def run_pipeline(url: str) -> None:
     if raw_data_file_path is None:
         return
 
-    # 2. preprocess (or load file)
-    transcript = preprocess_and_load_transcript(raw_data_file_path, episode_name)
-    if transcript is None:
+    # 2. preprocess and save
+    preprocessed_json_file_path = preprocess_and_save(raw_data_file_path, episode_name)
+    if preprocessed_json_file_path is None:
         return
 
-    # 3. synthesize
+    # 3. load transcript
+    transcript = load_transcript(preprocessed_json_file_path)
+
+    # 4. synthesize
     synthesize_episode_audio(transcript, episode_name)
