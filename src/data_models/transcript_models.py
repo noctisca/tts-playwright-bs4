@@ -3,13 +3,18 @@ from typing import List
 import json
 from pathlib import Path
 import os
+from enum import Enum
 
+class Role(Enum):
+    HOST = 'host'
+    GUEST = 'guest'
 
 @dataclass
 class Segment:
     """会話の一つのセグメントを表現するクラス"""
 
     speaker: str
+    role: Role
     text: str
 
     @property
@@ -61,7 +66,7 @@ class Transcript:
         chapters = []
         for chapter_data in data:
             segments = [
-                Segment(speaker=segment["speaker"], text=segment["text"])
+                Segment(speaker=segment["speaker"], role=segment['role'], text=segment["text"])
                 for segment in chapter_data["segments"]
             ]
             chapter = Chapter(
