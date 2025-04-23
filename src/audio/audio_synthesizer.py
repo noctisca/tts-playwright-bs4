@@ -31,38 +31,30 @@ class AudioSynthesizer:
                 f"VOICEVOXのsynthesis APIが失敗しました。テキスト: {segment.text[:100]}..."
             )
 
-    def _process_segments(self, chapter: Chapter, prev_speaker: str) -> str:
-        """チャプター内の各セグメントを処理し、最後のspeakerを返します"""
+    def _process_segments(self, chapter: Chapter) -> None:
+        """チャプター内の各セグメントを処理します"""
         for idx, segment in enumerate(chapter.segments):
-            speaker = segment.speaker  # 直接speakerを参照
             wav_output_path = chapter.get_segment_path(self.episode_name, idx)
 
             # ファイルが既に存在する場合はスキップ
             if os.path.exists(wav_output_path):
                 print(f"Skipping existing file: {wav_output_path}")
-                prev_speaker = speaker
                 continue
 
             self._synthesize_segment(segment, wav_output_path)
-            prev_speaker = speaker
 
-        return prev_speaker
-
-    def _process_chapter(self, chapter: Chapter, prev_speaker: str) -> str:
-        """チャプターを処理し、最後のspeakerを返します"""
+    def _process_chapter(self, chapter: Chapter) -> None:
+        """チャプターを処理します"""
         chapter_dir = chapter.get_chapter_dir(self.episode_name)
         os.makedirs(chapter_dir, exist_ok=True)
 
-        prev_speaker = self._process_segments(chapter, prev_speaker)
+        self._process_segments(chapter)
         self.concatenate_chapter_audio(chapter, chapter_dir)
-        return prev_speaker
 
     def synthesize_from_transcript(self, transcript: Transcript) -> None:
         """Transcriptオブジェクトから音声を合成します"""
-        prev_speaker = VoicevoxClient.HOST_NAME
-
         for chapter in transcript.chapters:
-            prev_speaker = self._process_chapter(chapter, prev_speaker)
+            self._process_chapter(chapter)
 
     def concatenate_chapter_audio(self, chapter: Chapter, chapter_dir: str) -> None:
         """チャプター内の音声ファイルを結合します"""
