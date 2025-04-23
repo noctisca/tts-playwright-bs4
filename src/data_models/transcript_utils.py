@@ -26,7 +26,7 @@ def transcript_from_dict(data: List[dict], episode_name: str) -> Transcript:
     return Transcript(chapters=chapters, episode_name=episode_name)
 
 
-def _transcript_to_dict(transcript: Transcript) -> List[dict]:
+def transcript_to_dict(transcript: Transcript) -> List[dict]:
     """Transcriptオブジェクトを辞書形式に変換します（内部用）"""
     return [asdict(chapter) for chapter in transcript.chapters]
 
