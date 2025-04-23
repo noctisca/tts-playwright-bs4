@@ -23,7 +23,7 @@ class AudioFileManager:
 
     def get_combined_output_path(self, chapter_no: str, chapter_title: str) -> str:
         """結合後の音声ファイルの出力パスを返す"""
-        output_dir = os.path.join("voicevox", "lex-fridman-podcast", self.episode_name)
+        output_dir = os.path.join("output", "lex-fridman-podcast", self.episode_name)
         return os.path.join(
             output_dir, f"{self.episode_name}-chapter-{chapter_no}-{chapter_title}.wav"
         )
