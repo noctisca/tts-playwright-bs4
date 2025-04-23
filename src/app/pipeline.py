@@ -5,7 +5,12 @@ from src.parsing.scraper import WebScraper
 from src.parsing.parser import HTMLParser
 from src.utils.utils import extract_episode_name_from_url
 from src.audio.audio_synthesizer import AudioSynthesizer
-from src.data_models.transcript_models import Transcript
+from src.data_models.transcript_utils import (
+    transcript_from_dict,
+    transcript_to_dict,
+    transcript_load_from_json,
+    transcript_save_to_json,
+)
 from src.parsing.preprocess import preprocess_data
 
 
@@ -35,8 +40,8 @@ async def get_raw_data(url: str, episode_name: str) -> str | None:
         # コンテンツが抽出できたら保存
         if transcript_data:
             # スクレイピング結果を元のJSONファイルに保存
-            transcript = Transcript.from_dict(transcript_data, episode_name)
-            transcript.save_to_json(raw_data_file_path)
+            transcript = transcript_from_dict(transcript_data, episode_name)
+            transcript_save_to_json(transcript, raw_data_file_path)
             print(f"Content from {url} has been saved to {raw_data_file_path}")
             return raw_data_file_path
         else:
@@ -61,7 +66,7 @@ def preprocess_and_load_transcript(
             f"既存の前処理済みファイルが見つかりました: {preprocessed_json_file_path}"
         )
         # 既存ファイルからTranscriptを読み込む
-        transcript = Transcript.load_from_json(preprocessed_json_file_path)
+        transcript = transcript_load_from_json(preprocessed_json_file_path)
         return transcript
     else:
         # 前処理の呼び出し
@@ -82,7 +87,7 @@ def preprocess_and_load_transcript(
             return None
 
         # 前処理結果の一時ファイルからTranscriptを読み込む
-        transcript = Transcript.load_from_json(preprocessed_json_file_path)
+        transcript = transcript_load_from_json(preprocessed_json_file_path)
         return transcript
 
 
