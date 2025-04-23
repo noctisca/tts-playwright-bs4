@@ -14,7 +14,7 @@ class AudioSynthesizer:
 
     def _synthesize_segment(self, segment: Segment, wav_output_path: str) -> None:
         """1つのセグメントの音声を合成してファイルに保存します"""
-        speaker_id = self.voicevox.get_speaker_id(segment.speaker)
+        speaker_id = self.voicevox.get_speaker_id(segment)
         query_data = self.voicevox.create_audio_query(segment.text, speaker_id)
         if query_data is None:
             raise RuntimeError(

@@ -19,6 +19,10 @@ class Segment:
     role: Role
     text: str
 
+    def is_host(self) -> bool:
+        """このセグメントがホストかどうかを判定"""
+        return self.role == Role.HOST
+
 
 @dataclass
 class Chapter:

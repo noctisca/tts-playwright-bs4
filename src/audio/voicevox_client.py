@@ -1,15 +1,15 @@
 import requests
 import time
 
+
 class VoicevoxClient:
     # VOICEVOXの設定
     BASE_URL = "http://127.0.0.1:50021"
     LONG_TEXT_THRESHOLD = 562  # 長いテキストと判断する文字数の閾値
 
     # 話者の設定
-    HOST_SPEAKER_ID = "9"  # ホスト（レックス）の声色用のVOICEVOX話者ID
+    HOST_SPEAKER_ID = "9"  # ホストの声色用のVOICEVOX話者ID
     GUEST_SPEAKER_ID = "13"  # ゲストの声色用のVOICEVOX話者ID
-    HOST_NAME = "レックス・フリードマン"
 
     def __init__(self, base_url=None):
         self.base_url = base_url or self.BASE_URL
@@ -48,10 +48,10 @@ class VoicevoxClient:
             return None
 
     @staticmethod
-    def get_speaker_id(speaker_name: str) -> str:
-        """話者名からVOICEVOXのspeaker_idを取得します"""
+    def get_speaker_id(segment) -> str:
+        """SegmentからVOICEVOXのspeaker_idを取得します"""
         return (
             VoicevoxClient.HOST_SPEAKER_ID
-            if speaker_name == VoicevoxClient.HOST_NAME
+            if segment.is_host()
             else VoicevoxClient.GUEST_SPEAKER_ID
         )
