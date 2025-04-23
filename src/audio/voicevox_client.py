@@ -14,10 +14,11 @@ class VoicevoxClient:
     def __init__(self, base_url=None):
         self.base_url = base_url or self.BASE_URL
 
-    def create_audio_query(self, text: str, segment) -> dict | None:
+    def create_audio_query(self, segment) -> dict | None:
         """VOICEVOXのaudio_query APIを呼び出してクエリデータを取得します"""
         speaker_id = self._get_speaker_id(segment)
         query_url = f"{self.base_url}/audio_query?speaker={speaker_id}"
+        text = segment.text
 
         # 長いテキストの場合は待機時間を入れる
         if len(text) >= self.LONG_TEXT_THRESHOLD:
