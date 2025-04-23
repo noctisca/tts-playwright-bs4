@@ -22,29 +22,26 @@ async def get_raw_data(url: str, episode_name: str) -> str | None:
     if os.path.exists(raw_data_file_path):
         print(f"既存のJSONファイルが見つかりました: {raw_data_file_path}")
         return raw_data_file_path
-    else:
-        translate_url = (
-            f"https://translate.google.com/translate?sl=auto&tl=ja&hl=ja&u={url}"
-        )
 
-        # スクレイピング処理
-        scraper = WebScraper(translate_url)
-        await scraper.fetch_content()
+    translate_url = (
+        f"https://translate.google.com/translate?sl=auto&tl=ja&hl=ja&u={url}"
+    )
 
-        # HTMLパース処理
-        parser = HTMLParser(scraper.get_content())
-        transcript_data = parser.extract_conversation_structure()
+    scraper = WebScraper(translate_url)
+    await scraper.fetch_content()
 
-        # コンテンツが抽出できたら保存
-        if transcript_data:
-            # スクレイピング結果を元のJSONファイルにそのまま保存
-            with open(raw_data_file_path, "w", encoding="utf-8") as f:
-                json.dump(transcript_data, f, ensure_ascii=False, indent=2)
-            print(f"Content from {url} has been saved to {raw_data_file_path}")
-            return raw_data_file_path
-        else:
-            print(f"Could not find content with class 'entry-content' on {url}.")
-            return None
+    parser = HTMLParser(scraper.get_content())
+    transcript_data = parser.extract_conversation_structure()
+
+    if not transcript_data:
+        print(f"Could not find content with class 'entry-content' on {url}.")
+        return None
+
+    with open(raw_data_file_path, "w", encoding="utf-8") as f:
+        json.dump(transcript_data, f, ensure_ascii=False, indent=2)
+
+    print(f"Content from {url} has been saved to {raw_data_file_path}")
+    return raw_data_file_path
 
 
 def preprocess_and_save(raw_data_file_path: str, episode_name: str) -> str | None:
