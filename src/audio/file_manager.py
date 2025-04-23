@@ -12,7 +12,7 @@ class AudioFileManager:
 
     def get_chapter_dir(self, chapter_no: str) -> str:
         """チャプターの音声ファイルを格納するディレクトリのパスを返す"""
-        return os.path.join("voicevox", self.episode_name, f"chapter-{chapter_no}")
+        return os.path.join("output", "audio", self.episode_name, f"chapter-{chapter_no}")
 
     def get_segment_path(self, chapter_no: str, segment_idx: int) -> str:
         """個別の音声セグメントファイルのパスを返す"""
