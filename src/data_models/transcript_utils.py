@@ -27,8 +27,8 @@ def transcript_from_dict(data: List[dict], episode_name: str) -> Transcript:
     return Transcript(chapters=chapters, episode_name=episode_name)
 
 
-def transcript_to_dict(transcript: Transcript) -> List[dict]:
-    """Transcriptオブジェクトを辞書形式に変換します"""
+def _transcript_to_dict(transcript: Transcript) -> List[dict]:
+    """Transcriptオブジェクトを辞書形式に変換します（内部用）"""
     return [asdict(chapter) for chapter in transcript.chapters]
 
 
@@ -44,4 +44,4 @@ def transcript_save_to_json(transcript: Transcript, file_path: str | Path) -> No
     """Transcriptオブジェクトをファイルに保存します"""
     os.makedirs(os.path.dirname(file_path), exist_ok=True)
     with open(file_path, "w", encoding="utf-8") as f:
-        json.dump(transcript_to_dict(transcript), f, ensure_ascii=False, indent=2)
+        json.dump(_transcript_to_dict(transcript), f, ensure_ascii=False, indent=2)
