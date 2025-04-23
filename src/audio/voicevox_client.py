@@ -14,8 +14,9 @@ class VoicevoxClient:
     def __init__(self, base_url=None):
         self.base_url = base_url or self.BASE_URL
 
-    def create_audio_query(self, text: str, speaker_id: str):
+    def create_audio_query(self, text: str, segment) -> dict | None:
         """VOICEVOXのaudio_query APIを呼び出してクエリデータを取得します"""
+        speaker_id = self.get_speaker_id(segment)
         query_url = f"{self.base_url}/audio_query?speaker={speaker_id}"
 
         # 長いテキストの場合は待機時間を入れる
@@ -33,8 +34,9 @@ class VoicevoxClient:
             print(f"Failed to generate audio query for text: {text}")
             return None
 
-    def synthesize_audio(self, query_data: dict, speaker_id: str) -> bytes | None:
+    def synthesize_audio(self, query_data: dict, segment) -> bytes | None:
         """VOICEVOXのsynthesis APIを呼び出して音声データを生成します"""
+        speaker_id = self.get_speaker_id(segment)
         synthesis_url = f"{self.base_url}/synthesis?speaker={speaker_id}"
 
         response = requests.post(

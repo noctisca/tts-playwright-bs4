@@ -14,14 +14,13 @@ class AudioSynthesizer:
 
     def _synthesize_segment(self, segment: Segment, wav_output_path: str) -> None:
         """1つのセグメントの音声を合成してファイルに保存します"""
-        speaker_id = self.voicevox.get_speaker_id(segment)
-        query_data = self.voicevox.create_audio_query(segment.text, speaker_id)
+        query_data = self.voicevox.create_audio_query(segment.text, segment)
         if query_data is None:
             raise RuntimeError(
                 f"VOICEVOXのaudio_query APIが失敗しました。テキスト: {segment.text[:100]}..."
             )
 
-        audio_content = self.voicevox.synthesize_audio(query_data, speaker_id)
+        audio_content = self.voicevox.synthesize_audio(query_data, segment)
         if audio_content is not None:
             with open(wav_output_path, "wb") as wav_file:
                 wav_file.write(audio_content)
