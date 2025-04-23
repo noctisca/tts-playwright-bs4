@@ -37,8 +37,10 @@ async def get_raw_data(url: str, episode_name: str) -> str | None:
         print(f"Could not find content with class 'entry-content' on {url}.")
         return None
 
-    result = save_json(transcript_data, raw_data_file_path)
-    if result is None:
+    try:
+        save_json(transcript_data, raw_data_file_path)
+    except Exception as e:
+        print(f"ファイル保存に失敗しました: {raw_data_file_path} ({e})")
         return None
 
     print(f"Content from {url} has been saved to {raw_data_file_path}")
@@ -69,8 +71,10 @@ def preprocess_and_save(raw_data_file_path: str, episode_name: str) -> str | Non
 
     print("前処理が完了しました。")
 
-    result = save_json(preprocessed_data, preprocessed_json_file_path)
-    if result is None:
+    try:
+        save_json(preprocessed_data, preprocessed_json_file_path)
+    except Exception as e:
+        print(f"前処理結果の保存に失敗しました: {e}")
         return None
 
     print(f"前処理結果を保存しました: {preprocessed_json_file_path}")

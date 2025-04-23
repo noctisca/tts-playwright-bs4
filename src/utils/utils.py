@@ -4,15 +4,11 @@ from urllib.parse import urlparse
 
 
 def save_json(data, filename):
-    """データを指定パスにJSON形式で保存し、例外時はエラーを出力してNoneを返す"""
-    try:
-        os.makedirs(os.path.dirname(filename), exist_ok=True)
-        with open(filename, "w", encoding="utf-8") as f:
-            json.dump(data, f, ensure_ascii=False, indent=2)
-        return filename
-    except Exception as e:
-        print(f"ファイル保存に失敗しました: {filename} ({e})")
-        return None
+    """データを指定パスにJSON形式で保存する。失敗時は例外をそのまま伝播する"""
+    os.makedirs(os.path.dirname(filename), exist_ok=True)
+    with open(filename, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+    return filename
 
 
 def extract_episode_name_from_url(url):
