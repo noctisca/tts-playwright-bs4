@@ -9,7 +9,7 @@ class VoicevoxClient:
 
     # 話者の設定
     HOST_SPEAKER_ID = "9"  # ホストの声色用のVOICEVOX話者ID
-    GUEST_SPEAKER_ID = "13"  # ゲストの声色用のVOICEVOX話者ID
+    GUEST_SPEAKER_ID = "52" # "13"  # ゲストの声色用のVOICEVOX話者ID
 
     def __init__(self, base_url=None):
         self.base_url = base_url or self.BASE_URL
