@@ -9,6 +9,7 @@ from src.data_models.transcript_utils import (
     transcript_from_dict,
     transcript_load_from_json,
 )
+from src.data_models.transcript_models import Transcript
 from src.parsing.preprocess import preprocess_data
 
 
