@@ -7,9 +7,7 @@ from src.utils.utils import extract_episode_name_from_url
 from src.audio.audio_synthesizer import AudioSynthesizer
 from src.data_models.transcript_utils import (
     transcript_from_dict,
-    transcript_to_dict,
     transcript_load_from_json,
-    transcript_save_to_json,
 )
 from src.parsing.preprocess import preprocess_data
 
@@ -39,9 +37,9 @@ async def get_raw_data(url: str, episode_name: str) -> str | None:
 
         # コンテンツが抽出できたら保存
         if transcript_data:
-            # スクレイピング結果を元のJSONファイルに保存
-            transcript = transcript_from_dict(transcript_data, episode_name)
-            transcript_save_to_json(transcript, raw_data_file_path)
+            # スクレイピング結果を元のJSONファイルにそのまま保存
+            with open(raw_data_file_path, "w", encoding="utf-8") as f:
+                json.dump(transcript_data, f, ensure_ascii=False, indent=2)
             print(f"Content from {url} has been saved to {raw_data_file_path}")
             return raw_data_file_path
         else:

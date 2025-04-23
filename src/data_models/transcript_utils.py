@@ -38,10 +38,3 @@ def transcript_load_from_json(file_path: str | Path) -> Transcript:
     with open(file_path, "r", encoding="utf-8") as f:
         data = json.load(f)
         return transcript_from_dict(data, episode_name)
-
-
-def transcript_save_to_json(transcript: Transcript, file_path: str | Path) -> None:
-    """Transcriptオブジェクトをファイルに保存します"""
-    os.makedirs(os.path.dirname(file_path), exist_ok=True)
-    with open(file_path, "w", encoding="utf-8") as f:
-        json.dump(_transcript_to_dict(transcript), f, ensure_ascii=False, indent=2)
