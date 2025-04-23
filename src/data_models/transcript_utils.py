@@ -1,5 +1,4 @@
 import json
-from dataclasses import asdict
 from pathlib import Path
 from src.data_models.transcript_models import Transcript, Chapter, Segment, Role
 from typing import List
