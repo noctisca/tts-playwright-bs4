@@ -34,7 +34,7 @@ class AudioSynthesizer:
     def _process_segments(self, chapter: Chapter, prev_speaker: str) -> str:
         """チャプター内の各セグメントを処理し、最後のspeakerを返します"""
         for idx, segment in enumerate(chapter.segments):
-            speaker = segment.determine_speaker(prev_speaker)
+            speaker = segment.speaker  # 直接speakerを参照
             wav_output_path = chapter.get_segment_path(self.episode_name, idx)
 
             # ファイルが既に存在する場合はスキップ
