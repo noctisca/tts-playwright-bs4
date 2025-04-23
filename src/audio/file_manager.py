@@ -7,8 +7,9 @@ from src.data_models.transcript_models import Chapter
 class AudioFileManager:
     """音声ファイルの結合・管理を担当するクラス"""
 
-    def __init__(self, episode_name: str):
+    def __init__(self, episode_name: str, podcast_name: str):
         self.episode_name = episode_name
+        self.podcast_name = podcast_name
 
     def get_chapter_dir(self, chapter_no: str) -> str:
         """チャプターの音声ファイルを格納するディレクトリのパスを返す"""
