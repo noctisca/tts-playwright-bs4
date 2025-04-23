@@ -13,7 +13,7 @@ from src.data_models.transcript_models import Transcript
 from src.parsing.preprocess import preprocess_data
 
 
-async def get_raw_data(url: str, episode_name: str) -> str | None:
+async def _get_raw_data(url: str, episode_name: str) -> str | None:
     """
     URLから生データを取得し、ファイルに保存する。
     既存ファイルがあればそれを読み込む。
@@ -48,7 +48,7 @@ async def get_raw_data(url: str, episode_name: str) -> str | None:
     return raw_data_file_path
 
 
-def preprocess_and_save(raw_data_file_path: str, episode_name: str) -> str | None:
+def _preprocess_and_save(raw_data_file_path: str, episode_name: str) -> str | None:
     """
     生データファイルからデータを読み込み、前処理を行い、前処理済みデータをファイルに保存する。
     保存したファイルパスを返す。
@@ -82,14 +82,14 @@ def preprocess_and_save(raw_data_file_path: str, episode_name: str) -> str | Non
     return preprocessed_json_file_path
 
 
-def load_transcript(preprocessed_json_file_path: str) -> Transcript:
+def _load_transcript(preprocessed_json_file_path: str) -> Transcript:
     """
     前処理済みファイルからTranscriptモデルをロードする
     """
     return transcript_load_from_json(preprocessed_json_file_path)
 
 
-def synthesize_episode_audio(transcript: Transcript, episode_name: str) -> None:
+def _synthesize_episode_audio(transcript: Transcript, episode_name: str) -> None:
     """
     Transcriptオブジェクトから音声合成を実行する。
     """
@@ -101,17 +101,17 @@ async def run_pipeline(url: str) -> None:
     episode_name = extract_episode_name_from_url(url)
 
     # 1. scraping (or load file)
-    raw_data_file_path = await get_raw_data(url, episode_name)
+    raw_data_file_path = await _get_raw_data(url, episode_name)
     if raw_data_file_path is None:
         return
 
     # 2. preprocess and save
-    preprocessed_json_file_path = preprocess_and_save(raw_data_file_path, episode_name)
+    preprocessed_json_file_path = _preprocess_and_save(raw_data_file_path, episode_name)
     if preprocessed_json_file_path is None:
         return
 
     # 3. load transcript
-    transcript = load_transcript(preprocessed_json_file_path)
+    transcript = _load_transcript(preprocessed_json_file_path)
 
     # 4. synthesize
-    synthesize_episode_audio(transcript, episode_name)
+    _synthesize_episode_audio(transcript, episode_name)
