@@ -32,6 +32,12 @@ class AudioFileManager:
     def concatenate_chapter_audio(self, chapter: Chapter, chapter_dir: str) -> None:
         """チャプター内の音声ファイルを結合します"""
 
+        # Check if combined file already exists
+        output_path = self.get_combined_output_path(chapter.no, chapter.title)
+        if os.path.exists(output_path):
+            print(f"Skipping concatenation, combined file already exists: {output_path}")
+            return
+
         def extract_idx(filename: str) -> int:
             match = re.search(
                 rf"{self.episode_name}_{chapter.no}_(\d+)\.wav$", filename
@@ -44,11 +50,16 @@ class AudioFileManager:
             if file.startswith(f"{self.episode_name}_{chapter.no}_")
             and file.endswith(".wav")
         ]
+
+        # If no segment files found, skip concatenation (avoid creating empty file)
+        if not wav_files:
+            print(f"No segment files found in {chapter_dir}, skipping concatenation for chapter {chapter.no}.")
+            return
+
         combined_audio = AudioSegment.empty()
         for wav_file in wav_files:
             combined_audio += AudioSegment.from_wav(wav_file)
 
-        output_path = self.get_combined_output_path(chapter.no, chapter.title)
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
         combined_audio.export(output_path, format="wav")
