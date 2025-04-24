@@ -1,7 +1,7 @@
 import json
 import os
 from src.data_models.transcript_utils import transcript_from_dict, transcript_to_dict
-from src.data_models.transcript_models import Transcript
+from src.data_models.transcript_models import Transcript, Role
 from typing import Dict, List, Any
 
 
@@ -29,25 +29,46 @@ def preprocess_data(file_path: str) -> List[Dict[str, Any]] | None:
             data, os.path.splitext(os.path.basename(file_path))[0]
         )
 
-        # 前処理ロジック
+        # 1. Speaker の決定
+        last_speaker = ""
         for chapter in transcript.chapters:
-            last_speaker = None
             for segment in chapter.segments:
-                if segment.speaker == "" and last_speaker is not None:
+                if segment.speaker == "":
+                    if last_speaker == "":
+                        raise ValueError(
+                            f"エラー: Chapter '{chapter.no}', Segment starting with "
+                            f"'{segment.text[:50]}...' で話者が見つからず、"
+                            f"前の話者情報もありません。データを確認してください。"
+                        )
                     segment.speaker = last_speaker
-                if segment.speaker == "レックス・フリードマン":
-                    segment.role = segment.role.__class__("host")
-                else:
-                    segment.role = segment.role.__class__("guest")
-                if segment.speaker != "":
-                    last_speaker = segment.speaker
+                last_speaker = segment.speaker
 
-        # dictに戻して返す
+        # 2. Role の決定
+        for chapter in transcript.chapters:
+            for segment in chapter.segments:
+                if segment.speaker == "レックス・フリードマン":
+                    segment.role = Role.HOST
+                elif segment.speaker != "":
+                    segment.role = Role.GUEST
+                else:
+                    raise ValueError(
+                        f"エラー: Chapter '{chapter.no}', Segment starting with "
+                        f"'{segment.text[:50]}...' で話者が空です。"
+                        f"Speaker決定処理に問題がある可能性があります。"
+                    )
+
+        # dictに戻して返す (Role Enum のシリアライズに注意)
         return transcript_to_dict(transcript)
 
     except json.JSONDecodeError:
         print(f"エラー: JSONファイルの読み込みに失敗しました - {file_path}")
         return None
+    except ValueError as ve:  # 追加したValueErrorをキャッチ
+        print(ve)  # エラーメッセージを表示
+        return None
     except Exception as e:
-        print(f"エラーが発生しました: {e}")
+        print(f"予期せぬエラーが発生しました: {e}")
+        # 必要であればここで詳細なエラーログを出力
+        # import traceback
+        # traceback.print_exc()
         return None
