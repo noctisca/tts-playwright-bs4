@@ -1,6 +1,6 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field  # field をインポート (デフォルト値のため)
 from enum import Enum
-from typing import List
+from typing import List, Optional  # Optional をインポート
 
 
 class Role(Enum):
@@ -11,8 +11,8 @@ class Role(Enum):
 @dataclass
 class Segment:
     speaker: str
-    role: Role
     text: str
+    role: Optional[Role] = None
 
     def is_host(self) -> bool:
         return self.role == Role.HOST
