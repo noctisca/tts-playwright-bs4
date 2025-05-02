@@ -7,6 +7,7 @@ from .file_manager import AudioFileManager
 from typing import List, Dict
 from src.data_models.transcript_models import Transcript, Chapter, Segment, Role
 from google.cloud import texttospeech  # Google TTS import
+from src.constants import HOST_SPEAKER_NAMES  # 定数をインポート
 
 
 class AudioSynthesizer:
@@ -28,8 +29,6 @@ class AudioSynthesizer:
 
         # 話者と音声のマッピングを保持する辞書
         self.speaker_voice_map: Dict[str, str] = {}
-        # ホストの話者名を定義 (必要に応じて外部から設定可能にしても良い)
-        self.host_speaker = "レックス・フリードマン"
         # 利用可能なGoogle TTS音声リスト
         self.google_host_voice = "ja-JP-Standard-B"
         self.google_guest_voices = [

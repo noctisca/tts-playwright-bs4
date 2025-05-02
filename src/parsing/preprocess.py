@@ -2,6 +2,7 @@ import json
 import os
 from src.data_models.transcript_utils import transcript_from_dict, transcript_to_dict
 from src.data_models.transcript_models import Transcript, Role
+from src.constants import HOST_SPEAKER_NAMES
 from typing import Dict, List, Any
 
 
@@ -46,7 +47,7 @@ def preprocess_data(file_path: str) -> List[Dict[str, Any]] | None:
         # 2. Role の決定
         for chapter in transcript.chapters:
             for segment in chapter.segments:
-                if segment.speaker == "レックス・フリードマン":
+                if segment.speaker in HOST_SPEAKER_NAMES:
                     segment.role = Role.HOST
                 elif segment.speaker != "":
                     segment.role = Role.GUEST
