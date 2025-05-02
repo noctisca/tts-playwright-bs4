@@ -20,7 +20,9 @@ class AudioSynthesizer:
             self.google_tts_client = texttospeech.TextToSpeechClient()
         except Exception as e:
             print(f"Failed to initialize Google TTS client: {e}")
-            print("Please ensure GOOGLE_APPLICATION_CREDENTIALS environment variable is set correctly.")
+            print(
+                "Please ensure GOOGLE_APPLICATION_CREDENTIALS environment variable is set correctly."
+            )
             self.google_tts_client = None
 
     def _synthesize_segment(self, segment: Segment, wav_output_path: str) -> None:
@@ -41,7 +43,9 @@ class AudioSynthesizer:
                 f"VOICEVOXのsynthesis APIが失敗しました。テキスト: {segment.text[:100]}..."
             )
 
-    def _synthesize_segment_google(self, segment: Segment, wav_output_path: str) -> None:
+    def _synthesize_segment_google(
+        self, segment: Segment, wav_output_path: str
+    ) -> None:
         """1つのセグメントの音声をGoogle TTSで合成してファイルに保存します"""
         if not self.google_tts_client:
             raise RuntimeError("Google TTS client is not initialized.")
