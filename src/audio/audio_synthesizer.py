@@ -1,10 +1,11 @@
 import os
 from pydub import AudioSegment
 import re
+from collections import Counter
 from .voicevox_client import VoicevoxClient
 from .file_manager import AudioFileManager
-from typing import List
-from src.data_models.transcript_models import Transcript, Chapter, Segment
+from typing import List, Dict
+from src.data_models.transcript_models import Transcript, Chapter, Segment, Role
 from google.cloud import texttospeech  # Google TTS import
 
 
@@ -24,6 +25,66 @@ class AudioSynthesizer:
                 "Please ensure GOOGLE_APPLICATION_CREDENTIALS environment variable is set correctly."
             )
             self.google_tts_client = None
+
+        # 話者と音声のマッピングを保持する辞書
+        self.speaker_voice_map: Dict[str, str] = {}
+        # ホストの話者名を定義 (必要に応じて外部から設定可能にしても良い)
+        self.host_speaker = "レックス・フリードマン"
+        # 利用可能なGoogle TTS音声リスト
+        self.google_host_voice = "ja-JP-Standard-B"
+        self.google_guest_voices = [
+            "ja-JP-Standard-D",
+            "ja-JP-Standard-C",
+            "ja-JP-Standard-A",
+            "ja-JP-Wavenet-C",
+            # 必要ならさらに追加
+        ]
+        # マッピングにない話者や、ゲスト音声リストが不足した場合のデフォルト
+        self.google_default_voice = "ja-JP-Standard-A"  # デフォルトは A にしてみる
+
+    def _build_speaker_voice_map(self, transcript: Transcript) -> None:
+        """Transcriptから話者の登場頻度を計算し、音声マッピングを構築する"""
+        speaker_counts = Counter()
+        guest_speakers = set()  # 重複なしのゲスト話者リスト
+
+        # 全セグメントを走査して話者と登場回数をカウント
+        for chapter in transcript.chapters:
+            for segment in chapter.segments:
+                # preprocess.py で Role が割り当てられている前提
+                if segment.speaker and segment.role == Role.GUEST:
+                    speaker_counts[segment.speaker] += 1
+                    guest_speakers.add(segment.speaker)
+
+        # 登場頻度順にゲスト話者をソート
+        # Counter.most_common() は (要素, 回数) のタプルリストを返す
+        # ここではゲストのみを対象とする
+        sorted_guest_speakers = [
+            speaker
+            for speaker, count in speaker_counts.most_common()
+            if speaker in guest_speakers  # Counterにはホストも含まれる可能性があるのでフィルタ
+        ]
+
+        # マッピングを作成
+        voice_map: Dict[str, str] = {}
+        # ホストの割り当て
+        voice_map[self.host_speaker] = self.google_host_voice
+
+        # ゲストの割り当て (登場頻度順)
+        for i, speaker in enumerate(sorted_guest_speakers):
+            if i < len(self.google_guest_voices):
+                voice_map[speaker] = self.google_guest_voices[i]
+            else:
+                # 利用可能なゲスト音声リストが足りなくなった場合
+                print(
+                    f"警告: 利用可能なゲスト音声が不足しています。話者 '{speaker}' にデフォルト音声 '{self.google_default_voice}' を割り当てます。"
+                )
+                voice_map[speaker] = self.google_default_voice
+
+        self.speaker_voice_map = voice_map
+        print("--- Speaker-Voice Map ---")
+        for speaker, voice in self.speaker_voice_map.items():
+            print(f"- {speaker}: {voice}")
+        print("-------------------------")
 
     def _synthesize_segment(self, segment: Segment, wav_output_path: str) -> None:
         """1つのセグメントの音声を合成してファイルに保存します"""
@@ -52,11 +113,7 @@ class AudioSynthesizer:
 
         synthesis_input = texttospeech.SynthesisInput(text=segment.text)
 
-        # Select voice based on role
-        if segment.is_host():
-            voice_name = "ja-JP-Standard-B"  # Host voice
-        else:
-            voice_name = "ja-JP-Standard-D"  # Guest voice
+        voice_name = self.speaker_voice_map.get(segment.speaker, self.google_default_voice)
 
         voice = texttospeech.VoiceSelectionParams(
             language_code="ja-JP", name=voice_name
@@ -102,5 +159,8 @@ class AudioSynthesizer:
 
     def synthesize_from_transcript(self, transcript: Transcript) -> None:
         """Transcriptオブジェクトから音声を合成します"""
+
+        self._build_speaker_voice_map(transcript)
+
         for chapter in transcript.chapters:
             self._process_chapter(chapter)
