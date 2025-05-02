@@ -18,7 +18,8 @@ async def _get_raw_data(url: str, episode_name: str) -> str | None:
     URLから生データを取得し、ファイルに保存する。
     既存ファイルがあればそれを読み込む。
     """
-    raw_data_file_path = os.path.join("output", f"{episode_name}.json")
+    output_dir = os.path.join("output", "data")
+    raw_data_file_path = os.path.join(output_dir, f"{episode_name}.json")
 
     if os.path.exists(raw_data_file_path):
         print(f"既存のJSONファイルが見つかりました: {raw_data_file_path}")
