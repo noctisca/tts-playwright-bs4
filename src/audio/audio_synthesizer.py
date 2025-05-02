@@ -61,7 +61,8 @@ class AudioSynthesizer:
         sorted_guest_speakers = [
             speaker
             for speaker, count in speaker_counts.most_common()
-            if speaker in guest_speakers  # Counterにはホストも含まれる可能性があるのでフィルタ
+            if speaker
+            in guest_speakers  # Counterにはホストも含まれる可能性があるのでフィルタ
         ]
 
         # マッピングを作成
@@ -113,7 +114,9 @@ class AudioSynthesizer:
 
         synthesis_input = texttospeech.SynthesisInput(text=segment.text)
 
-        voice_name = self.speaker_voice_map.get(segment.speaker, self.google_default_voice)
+        voice_name = self.speaker_voice_map.get(
+            segment.speaker, self.google_default_voice
+        )
 
         voice = texttospeech.VoiceSelectionParams(
             language_code="ja-JP", name=voice_name
