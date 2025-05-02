@@ -56,8 +56,6 @@ class AudioSynthesizer:
                     guest_speakers.add(segment.speaker)
 
         # 登場頻度順にゲスト話者をソート
-        # Counter.most_common() は (要素, 回数) のタプルリストを返す
-        # ここではゲストのみを対象とする
         sorted_guest_speakers = [
             speaker
             for speaker, count in speaker_counts.most_common()
@@ -65,21 +63,22 @@ class AudioSynthesizer:
             in guest_speakers  # Counterにはホストも含まれる可能性があるのでフィルタ
         ]
 
-        # マッピングを作成
+        # --- ゲスト数のチェック ---
+        if len(sorted_guest_speakers) > len(self.google_guest_voices):
+            raise ValueError(
+                f"検出されたゲスト話者数 ({len(sorted_guest_speakers)}) が、"
+                f"利用可能なゲスト音声数 ({len(self.google_guest_voices)}) を超えています。"
+                f" ゲスト話者リスト: {sorted_guest_speakers}"
+            )
+        # -------------------------
+
         voice_map: Dict[str, str] = {}
         # ホストの割り当て
         voice_map[self.host_speaker] = self.google_host_voice
 
         # ゲストの割り当て (登場頻度順)
         for i, speaker in enumerate(sorted_guest_speakers):
-            if i < len(self.google_guest_voices):
-                voice_map[speaker] = self.google_guest_voices[i]
-            else:
-                # 利用可能なゲスト音声リストが足りなくなった場合
-                print(
-                    f"警告: 利用可能なゲスト音声が不足しています。話者 '{speaker}' にデフォルト音声 '{self.google_default_voice}' を割り当てます。"
-                )
-                voice_map[speaker] = self.google_default_voice
+             voice_map[speaker] = self.google_guest_voices[i]
 
         self.speaker_voice_map = voice_map
         print("--- Speaker-Voice Map ---")
