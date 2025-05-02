@@ -54,8 +54,9 @@ def _preprocess_and_save(raw_data_file_path: str, episode_name: str) -> str | No
     生データファイルからデータを読み込み、前処理を行い、前処理済みデータをファイルに保存する。
     保存したファイルパスを返す。
     """
+    output_dir = os.path.join("output", "data")
     preprocessed_json_file_path = os.path.join(
-        "output", f"{episode_name}_preprocessed.json"
+        output_dir, f"{episode_name}_preprocessed.json"
     )
 
     if os.path.exists(preprocessed_json_file_path):
