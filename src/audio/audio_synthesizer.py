@@ -34,9 +34,6 @@ class AudioSynthesizer:
         self.google_guest_voices = [
             "ja-JP-Standard-D",
             "ja-JP-Standard-C",
-            "ja-JP-Standard-A",
-            "ja-JP-Wavenet-C",
-            # 必要ならさらに追加
         ]
         # マッピングにない話者や、ゲスト音声リストが不足した場合のデフォルト
         self.google_default_voice = "ja-JP-Standard-A"  # デフォルトは A にしてみる
@@ -64,10 +61,11 @@ class AudioSynthesizer:
 
         # --- ゲスト数のチェック ---
         if len(sorted_guest_speakers) > len(self.google_guest_voices):
-            raise ValueError(
-                f"検出されたゲスト話者数 ({len(sorted_guest_speakers)}) が、"
+            print(
+                f"注意: 検出されたゲスト話者数 ({len(sorted_guest_speakers)}) が、"
                 f"利用可能なゲスト音声数 ({len(self.google_guest_voices)}) を超えています。"
                 f" ゲスト話者リスト: {sorted_guest_speakers}"
+                f" 余分なゲストにはリストの最後の音声が割り当てられます。"
             )
         # -------------------------
 
@@ -77,7 +75,8 @@ class AudioSynthesizer:
 
         # ゲストの割り当て (登場頻度順)
         for i, speaker in enumerate(sorted_guest_speakers):
-             voice_map[speaker] = self.google_guest_voices[i]
+            # ゲストの数がリストの長さを超えた場合、リストの最後の音声を割り当てる
+            voice_map[speaker] = self.google_guest_voices[i] if i < len(self.google_guest_voices) else self.google_guest_voices[-1]
 
         self.speaker_voice_map = voice_map
         print("--- Speaker-Voice Map ---")
