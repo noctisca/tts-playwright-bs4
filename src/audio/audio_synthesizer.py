@@ -71,7 +71,7 @@ class AudioSynthesizer:
 
         voice_map: Dict[str, str] = {}
         # ホストの割り当て
-        voice_map[self.host_speaker] = self.google_host_voice
+        # voice_map[self.host_speaker] = self.google_host_voice
 
         # ゲストの割り当て (登場頻度順)
         for i, speaker in enumerate(sorted_guest_speakers):
