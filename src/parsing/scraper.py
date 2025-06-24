@@ -7,6 +7,7 @@ class WebScraper:
 
     async def fetch_content(self):
         """ Playwrightを使って翻訳ページからHTMLを取得 """
+        print("Playwrightによるページ取得を開始しています（この処理には数分かかる場合があります）...")
         async with async_playwright() as p:
             browser = await p.chromium.launch(headless=True)
             page = await browser.new_page()
