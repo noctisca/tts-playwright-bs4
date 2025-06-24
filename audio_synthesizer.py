@@ -19,7 +19,7 @@ class AudioSynthesizer:
         for chapter in data:
             chapter_no = chapter['no']
             segments = chapter['segments']
-            chapter_dir = f"voicebox/{self.base_filename}/chapter-{chapter_no}"
+            chapter_dir = f"voicevox/{self.base_filename}/chapter-{chapter_no}"
             os.makedirs(chapter_dir, exist_ok=True)
 
             for idx, segment in enumerate(segments):
