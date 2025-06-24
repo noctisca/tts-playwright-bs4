@@ -71,7 +71,7 @@ class AudioSynthesizer:
         combined_audio = AudioSegment.empty()
         for wav_file in wav_files:
             combined_audio += AudioSegment.from_wav(wav_file)
-        output_dir = f"lex-fridman-podcast/{self.base_filename}"
+        output_dir = f"voicevox/lex-fridman-podcast/{self.base_filename}"
         os.makedirs(output_dir, exist_ok=True)
         chapter_title = chapter['title']
         chapter_no = chapter['no']
